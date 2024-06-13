@@ -21,7 +21,7 @@ TYPE_ALBUM_TRACK = "album_track" # used for listing songs of an album
 # END TYPES
 
 session = None
-
+country = config['deezer']['country']
 
 def init_deezer_session():
     global session
@@ -343,7 +343,7 @@ def get_song_infos_from_deezer_website(search_type, id):
     # 2. Deezer gives you a 404: https://www.deezer.com/de/track/68925038
     # Deezer403Exception if we are not logged in
 
-    url = "https://www.deezer.com/de/{}/{}".format(search_type, id)
+    url = "https://www.deezer.com/{}/{}/{}".format(country, search_type, id)
     resp = session.get(url)
     if resp.status_code == 404:
         raise Deezer404Exception("ERROR: Got a 404 for {} from Deezer".format(url))
@@ -441,8 +441,8 @@ def parse_deezer_playlist(playlist_id):
             'start': 0,
             'tab': 0,
             'header': True,
-            'lang': 'de',
-            'nb': 500}
+            'lang': country,
+            'nb': -1}
     req = session.post(url_get_playlist_songs, json=data)
     json = req.json()
 
@@ -481,7 +481,7 @@ def test_deezer_login():
         return False
 
     if song:
-        print("Login is still working.")
+        print("Login works.")
         return True
     else:
         print("Login is not working anymore.")
