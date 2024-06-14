@@ -41,29 +41,17 @@ def download_favorites():
 def download_playlist(playlist):
     playlist_name, tracks = parse_deezer_playlist(playlist)
 
-    playlist_dir = config['deezer']['music_dir'] + '/' + playlist_name.replace(' ', '_')
+    playlist_dir = config['deezer']['music_dir'] + playlist_name.replace(' ', '_')
     os.makedirs(playlist_dir, exist_ok=True)
 
     for track in tracks:
         SNG_TITLE = track['SNG_TITLE']
         ART_NAME = track['ART_NAME']
 
-        FILESIZE_FLAC = track['FILESIZE_FLAC']
-        FILESIZE_MP3_320 = track['FILESIZE_MP3_320']
-        FILESIZE_MP3_256 = track['FILESIZE_MP3_256']
-        SNG_ID = track['SNG_ID']
-        MD5_ORIGIN = track['MD5_ORIGIN']
-        MEDIA_VERSION = track['MEDIA_VERSION']
-
-        # print('----')
-        # print(SNG_TITLE)
-        # print('FILESIZE_FLAC ' + FILESIZE_FLAC)
-        # print('FILESIZE_MP3_320 ' + FILESIZE_MP3_320)
-        # print('FILESIZE_MP3_256 ' + FILESIZE_MP3_256)
-
         try:
             song_filename = format_song_filename(ART_NAME, SNG_TITLE)
             song_path = os.path.join(playlist_dir, song_filename)
+            
             # We only support FLAC and MP3
             if os.path.exists(song_path+'.flac') or os.path.exists(song_path+'.mp3'):
                 continue

@@ -276,7 +276,7 @@ def download_song(song, output_file):
                    3 if int(song.get("FILESIZE_MP3_320")) else \
                    5 if int(song.get("FILESIZE_MP3_256")) else \
                    1
-
+    
     urlkey = genurlkey(song["SNG_ID"], song["MD5_ORIGIN"], song["MEDIA_VERSION"], song_quality)
     key = calcbfkey(song["SNG_ID"])
     try:
@@ -311,7 +311,7 @@ def download_song(song, output_file):
             # open in a new tab the song Moby - Honey
             # this will give you a 404!?
             # but you can play the song in the browser
-            print("ERROR: Can not download this song. Got a {}".format(fh.status_code))
+            print("ERROR {}: Can not download '{}'".format(fh.status_code, song["SNG_TITLE"]))
             return
 
         # Properly pick the extension (flac or mp3)
