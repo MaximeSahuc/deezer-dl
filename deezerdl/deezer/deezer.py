@@ -458,6 +458,26 @@ def parse_deezer_playlist(playlist_id):
     return playlist_name, json_data['SONGS']['data']
 
 
+def parse_deezer_track(track_id):
+    try:
+        track_id = re.search(r'\d+', track_id).group(0)
+    except AttributeError:
+        raise DeezerApiException("ERROR: Regex (\\d+) for track_id failed. You gave me '{}'".format(track_id))
+    url_get_csrf_token = "https://www.deezer.com/ajax/gw-light.php?method=deezer.getUserData&input=3&api_version=1.0&api_token="
+    req = session.post(url_get_csrf_token)
+    csrf_token = req.json()['results']['checkForm']
+
+    url_get_track = "https://www.deezer.com/ajax/gw-light.php?method=song.getListData&input=3&api_version=1.0&api_token={}".format(csrf_token)
+    data = {'sng_ids': [int(track_id)]}
+    req = session.post(url_get_track, json=data)
+    json_data = req.json()
+
+    if len(json_data['error']) > 0:
+        raise DeezerApiException("ERROR: deezer api said {}".format(json_data['error']))
+
+    return json_data['results']['data'][0]
+
+
 def get_deezer_favorites(user_id: str) -> Optional[Sequence[int]]:
     if not user_id.isnumeric():
         raise Exception(f"User id '{user_id}' must be numeric")

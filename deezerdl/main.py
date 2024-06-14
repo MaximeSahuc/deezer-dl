@@ -5,7 +5,7 @@ import os
 import argparse
 import json
 
-from deezer.deezer import config, test_deezer_login, get_song_infos_from_deezer_website, download_song, get_deezer_favorites, parse_deezer_playlist, TYPE_TRACK
+from deezer.deezer import config, test_deezer_login, get_song_infos_from_deezer_website, download_song, get_deezer_favorites, parse_deezer_playlist, parse_deezer_track, TYPE_TRACK
 from deezer.utils import format_song_filename
 
 if not sys.platform.startswith('linux'):
@@ -62,6 +62,28 @@ def download_playlist(playlist):
             pass
 
 
+def download_track(track):
+    playlist_dir = config['deezer']['music_dir'] + 'Singles'
+    os.makedirs(playlist_dir, exist_ok=True)
+
+    data = parse_deezer_track(track)
+
+    SNG_TITLE = data['SNG_TITLE']
+    ART_NAME = data['ART_NAME']
+
+    try:
+        song_filename = format_song_filename(ART_NAME, SNG_TITLE)
+        song_path = os.path.join(playlist_dir, song_filename)
+        
+        # We only support FLAC and MP3
+        if os.path.exists(song_path+'.flac') or os.path.exists(song_path+'.mp3'):
+            return
+
+        download_song(data, song_path)
+    except Exception as e:
+        print(e)
+        pass
+
 def main():
     description = """
     check      Verify Deezer login.
@@ -80,10 +102,14 @@ def main():
             download_favorites()
         
         else:
-            # Assume its a playlist link
-            # TODO : check if its a track
-            download_playlist(arg)
+            if 'track' in arg:
+                download_track(arg)
+            elif 'playlist' in arg:
+                download_playlist(arg)
+            else:
+                print('Cannot detect link type')
 
 
 if __name__ == "__main__":
     main()
+    print('Done!')
