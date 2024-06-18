@@ -41,7 +41,7 @@ def download_favorites():
 def download_playlist(playlist):
     playlist_name, tracks = parse_deezer_playlist(playlist)
 
-    playlist_dir = config['deezer']['music_dir'] + playlist_name.replace(' ', '_')
+    playlist_dir = os.path.join(config['deezer']['music_dir'], 'Playlists', playlist_name.replace(' ', '_'))
     os.makedirs(playlist_dir, exist_ok=True)
 
     for track in tracks:
