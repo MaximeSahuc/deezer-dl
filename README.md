@@ -4,49 +4,55 @@ Download music directly from deezer.
 
 You will need a file `settings.ini` file in your `~/.config/deezer-dl`.
 
-Only works for linux. Don't hesitate to open an issue for any feature request.
+Only works for linux.
 
 ```ini
 ;;; base config
 
 [deezer]
-; valid arl cookie value
-; login manually using your web browser and take the arl ookie
+; login manually using your web browser and take the arl cookie
 cookie_arl = <deezer-cookie>
 
-; download flac files (if False mp3 is used)
-flac_quality = True
-
 ; user id for favorite song to be downloaded
-user_id = "00000000"
+user_id = 0123456789
 
 ; music diriectory
 music_dir = /tmp/deezer-dl
+
+; deezer country
+country = us
 ```
 
 ## Install
 
 ```
-$ pip install -U git+https://github.com/rllola/deezer-dl.git
+$ pip install -U git+https://github.com/MaximeSahuc/deezer-dl.git
 ```
 
 ## Feature
 
+Download a playlist
 ```
-usage: deezer-dl [-h] {check,download} ...
+deezer-dl https://www.deezer.com/fr/playlist/0123456789
+```
 
-optional arguments:
-  -h, --help        show this help message and exit
+Download a single track
+```
+deezer-dl https://www.deezer.com/us/track/0123456789
+```
 
-command:
-  
-      check      Verify Deezer login.
-      download   Download favorites.    
-      
+Download favorites
+```
+deezer-dl favorites
+```
 
-  {check,download}
+Check connectivity to Deezer
+```
+deezer-dl check
 ```
 
 ## Acknowledgement
 
 Thanks to kmile hardwork see : https://github.com/kmille/deezer-downloader
+
+Forked from : https://github.com/rllola/deezer-dl
