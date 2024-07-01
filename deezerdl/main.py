@@ -2,19 +2,28 @@
 
 import sys
 import os
-import argparse
 import json
+import argparse
+from collections.abc import Sequence
 
 from deezer.deezer import config, test_deezer_login, get_song_infos_from_deezer_website, download_song, get_deezer_favorites, parse_deezer_playlist, parse_deezer_track, TYPE_TRACK
 from deezer.utils import format_song_filename
 
+# Check if on Linux
 if not sys.platform.startswith('linux'):
     print('Only linux is supported.')
     sys.exit(1)
 
 
 def print_help():
-    print("Commands:\n check\n deezerdl https://deezer.com/...")
+    print("""Usage: deezer-dl url [check] [favorites]
+
+Download Music from Deezer
+
+arguments:
+  url          URL of a Deezer track or playlist 
+  check        Test Deezer Token
+  favorites    Download favorites tracks from user in config file""")
 
 
 def download_favorites():
@@ -63,7 +72,7 @@ def download_playlist(playlist):
 
 
 def download_track(track):
-    playlist_dir = config['deezer']['music_dir'] + 'Singles'
+    playlist_dir = os.path.join(config['deezer']['music_dir'], 'Tracks')
     os.makedirs(playlist_dir, exist_ok=True)
 
     data = parse_deezer_track(track)
@@ -85,25 +94,24 @@ def download_track(track):
         pass
 
 def main():
-    description = """
-    check      Verify Deezer login.
-    download   Download favorites.    
-    """
-    
     if len(sys.argv) != 2:
         print_help()
     else:
         arg = sys.argv[1]
-        
+
         if arg == 'check':
             test_deezer_login()
-        
+
         elif arg == 'favorites':
             download_favorites()
-        
+
+        elif arg == 'all':
+            print("download All playlists for user")
+
         else:
             if 'track' in arg:
                 download_track(arg)
+                print('Done!')
             elif 'playlist' in arg:
                 download_playlist(arg)
             else:
@@ -111,5 +119,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
-    print('Done!')
+    raise SystemExit(main())
