@@ -16,7 +16,7 @@ cookie_arl = your_arl_cookie
 ; user id for favorite song to be downloaded
 user_id = your_user_id
 
-music_dir = ~/Music/deezer
+music_dir = /tmp/deezer-dl
 
 flac_quality = False
 

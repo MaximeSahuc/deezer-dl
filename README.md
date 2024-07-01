@@ -5,7 +5,7 @@ Download music directly from deezer. (Linux only)
 ## Install
 
 ```
-$ pip install -U git+https://github.com/MaximeSahuc/deezer-dl.git
+pip install -U git+https://github.com/MaximeSahuc/deezer-dl.git
 ```
 
 ## Feature
@@ -20,9 +20,14 @@ Download a single track
 deezer-dl https://www.deezer.com/us/track/0123456789
 ```
 
-Download favorites
+Download favorites tracks of the configured user
 ```
 deezer-dl favorites
+```
+
+Download all playlists of the configured user
+```
+deezer-dl all
 ```
 
 Check connectivity to Deezer
