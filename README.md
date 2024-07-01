@@ -1,27 +1,6 @@
 # Deezer Downloader
 
-Download music directly from deezer.
-
-You will need a file `settings.ini` file in your `~/.config/deezer-dl`.
-
-Only works for linux.
-
-```ini
-;;; base config
-
-[deezer]
-; login manually using your web browser and take the arl cookie
-cookie_arl = <deezer-cookie>
-
-; user id for favorite song to be downloaded
-user_id = 0123456789
-
-; music diriectory
-music_dir = /tmp/deezer-dl
-
-; deezer country
-country = us
-```
+Download music directly from deezer. (Linux only)
 
 ## Install
 
@@ -55,4 +34,4 @@ deezer-dl check
 
 Thanks to kmile hardwork see : https://github.com/kmille/deezer-downloader
 
-Forked from : https://github.com/rllola/deezer-dl
+Forked from rllola : https://github.com/rllola/deezer-dl
