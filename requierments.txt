@@ -9,3 +9,5 @@ requests     2.25.1
 setuptools   46.4.0
 urllib3      1.26.4
 wheel        0.34.2
+alive-progress
+termcolor

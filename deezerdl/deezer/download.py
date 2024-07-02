@@ -1,5 +1,8 @@
 import os
 
+from termcolor import colored
+from alive_progress import alive_bar
+
 from deezer.deezer import config, test_deezer_login, get_song_infos_from_deezer_website, download_song, get_deezer_favorites, parse_deezer_playlist, parse_deezer_track, parse_deezer_user_playlists, TYPE_TRACK
 from deezer.utils import format_song_filename
 
@@ -30,22 +33,30 @@ def download_playlist(playlist):
     playlist_dir = os.path.join(config['deezer']['music_dir'], 'Playlists', playlist_name.replace(' ', '_'))
     os.makedirs(playlist_dir, exist_ok=True)
 
-    for track in tracks:
-        SNG_TITLE = track['SNG_TITLE']
-        ART_NAME = track['ART_NAME']
-
-        try:
-            song_filename = format_song_filename(ART_NAME, SNG_TITLE)
-            song_path = os.path.join(playlist_dir, song_filename)
+    bar_title = colored(playlist_name, 'red')
+    with alive_bar(len(tracks), bar='classic2', spinner='waves2', length=50, stats=False, elapsed=False, dual_line=True, title=bar_title) as bar:
+        for track in tracks:
+            SNG_TITLE = track['SNG_TITLE']
+            ART_NAME = track['ART_NAME']
             
-            # We only support FLAC and MP3
-            if os.path.exists(song_path+'.flac') or os.path.exists(song_path+'.mp3'):
-                continue
+            try:
+                song_filename = format_song_filename(ART_NAME, SNG_TITLE)
+                song_path = os.path.join(playlist_dir, song_filename)
+                
+                bar.text(' - ' + colored(song_filename, 'blue'))
 
-            download_song(track, song_path)            
-        except Exception as e:
-            print(e)
-            pass
+                # We only support FLAC and MP3
+                if os.path.exists(song_path+'.flac') or os.path.exists(song_path+'.mp3'):
+                    bar()
+                    continue
+
+                download_song(track, song_path)            
+            except Exception as e:
+                print("ERROR")
+                print(e)
+                pass
+
+            bar()
 
 
 def download_track(track):
@@ -70,7 +81,6 @@ def download_track(track):
         print(e)
         return 1
 
-
 def download_all_playlists():
     user = config['deezer']['user_id']
     result = parse_deezer_user_playlists(user)
@@ -78,12 +88,40 @@ def download_all_playlists():
 
     print(f"Loaded {len(playlists)}/{result['total']} playlists")
 
-    for playlist in playlists:
-        pl_title = playlist['TITLE']
-        pl_nb_song = playlist['NB_SONG']
-        pl_id = playlist['PLAYLIST_ID']
+    bar_title = colored('All playlists', 'red')
+    with alive_bar(len(playlists), bar='classic2', spinner='waves2', length=50, stats=False, elapsed=False, dual_line=True, title=bar_title) as bar:
+        for playlist in playlists:
+            tmp_counter = 0
+            pl_title = playlist['TITLE']
+            pl_nb_song = playlist['NB_SONG']
+            pl_id = playlist['PLAYLIST_ID']
 
-        print(f"  Downloading {pl_title} : {pl_nb_song} tracks")
+            playlist_name, tracks = parse_deezer_playlist(pl_id)
 
-        download_playlist(pl_id)
-        print(f"  Downloaded {pl_title}")
+            playlist_dir = os.path.join(config['deezer']['music_dir'], 'Playlists', playlist_name.replace(' ', '_'))
+            os.makedirs(playlist_dir, exist_ok=True)
+
+            for track in tracks:
+                SNG_TITLE = track['SNG_TITLE']
+                ART_NAME = track['ART_NAME']
+                
+                try:
+                    song_filename = format_song_filename(ART_NAME, SNG_TITLE)
+                    song_path = os.path.join(playlist_dir, song_filename)
+                    
+                    # We only support FLAC and MP3
+                    if os.path.exists(song_path+'.flac') or os.path.exists(song_path+'.mp3'):
+                        tmp_counter += 1
+                        continue
+
+                    download_song(track, song_path)            
+                except Exception as e:
+                    print("ERROR")
+                    print(e)
+                    pass
+                
+                tmp_counter += 1
+                download_infos = f" - {tmp_counter}/{pl_nb_song}"
+                bar.text(' - ' + colored(pl_title, 'blue') + download_infos)
+
+            bar()

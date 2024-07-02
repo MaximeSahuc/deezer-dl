@@ -328,8 +328,8 @@ def download_song(song, output_file):
 
     except Exception as e:
         raise
-    else:
-        print("Download finished: {}".format(output_file))
+    # else:
+    #     print("Download finished: {}".format(output_file))
 
 
 def get_song_infos_from_deezer_website(search_type, id):
@@ -452,9 +452,9 @@ def parse_deezer_playlist(playlist_id):
 
     playlist_name = json_data['DATA']['TITLE']
     number_songs = json_data['DATA']['NB_SONG']
-    print("Playlist '{}' has {} songs".format(playlist_name, number_songs))
+    # print("Playlist '{}' has {} songs".format(playlist_name, number_songs))
 
-    print("Got {} songs from API".format(json_data['SONGS']['count']))
+    # print("Got {} songs from API".format(json_data['SONGS']['count']))
     return playlist_name, json_data['SONGS']['data']
 
 

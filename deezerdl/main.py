@@ -18,7 +18,8 @@ Download Music from Deezer
 arguments:
   url          URL of a Deezer track or playlist 
   check        Test Deezer Token
-  favorites    Download favorites tracks from user in config file""")
+  favorites    Download favorites tracks from user in config file
+  all          Download all playlists of the configured user""")
 
 
 def main() -> int:
@@ -35,7 +36,7 @@ def main() -> int:
             download_favorites()
 
         elif arg == 'all':
-            print("download all user's playlists")
+            print("Download all playlists of the configured user.")
             download_all_playlists()
 
         else:
