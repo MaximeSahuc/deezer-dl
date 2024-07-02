@@ -309,10 +309,12 @@ def download_song(song, output_file):
             # open in a new tab the song Moby - Honey
             # this will give you a 404!?
             # but you can play the song in the browser
-            print("ERROR {}: Can not download '{}'".format(fh.status_code, song["SNG_TITLE"]))
+            song_title = song['SNG_TITLE']
+            artist_name = song['ART_NAME']
+            
+            song_filename = format_song_filename(artist_name, song_title)
+            print("ERROR {}: Can not download '{}'".format(fh.status_code, song_filename))
             return
-
-        output_file = output_file + '.mp3'
 
         with open(output_file, "w+b") as fo:
             # add songcover and DL first 30 sec's that are unencrypted

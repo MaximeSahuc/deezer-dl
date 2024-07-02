@@ -18,6 +18,9 @@ user_id = your_user_id
 
 music_dir = /tmp/deezer-dl
 
+; download track once, use hard links for tracks in playlists
+use_hard_links = True
+
 ; deezer country
 country = us"""
         )
