@@ -18,8 +18,6 @@ user_id = your_user_id
 
 music_dir = /tmp/deezer-dl
 
-flac_quality = False
-
 ; deezer country
 country = us"""
         )
@@ -28,13 +26,6 @@ country = us"""
 
 def load_config(config_path):
     config.read(config_path)
-
-    if "DEEZER_FLAC_QUALITY" in os.environ.keys():
-        config["deezer"]["flac_quality"] = os.environ["DEEZER_FLAC_QUALITY"]
-
-    if "flac_quality" not in config['deezer'] or config['deezer'].getboolean('flac_quality') not in (True, False):
-        print("flac_quality muste be set (True or False)")
-        sys.exit(1)
 
     if "DEEZER_COOKIE_ARL" in os.environ.keys():
         config["deezer"]["cookie_arl"] = os.environ["DEEZER_COOKIE_ARL"]

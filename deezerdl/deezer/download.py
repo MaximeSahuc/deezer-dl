@@ -18,8 +18,8 @@ def download_favorites():
             song_info = get_song_infos_from_deezer_website(TYPE_TRACK, song_id)
             song_filename = format_song_filename(song_info['ART_NAME'],song_info['SNG_TITLE'])
             song_path = os.path.join(playlist_path, song_filename)
-            # We only support FLAC and MP3
-            if os.path.exists(song_path+'.flac') or os.path.exists(song_path+'.mp3'):
+            # We only support MP3
+            if os.path.exists(song_path+'.mp3'):
                 continue
             download_song(song_info, song_path)            
         except Exception as e:
@@ -45,8 +45,8 @@ def download_playlist(playlist):
                 
                 bar.text(' - ' + colored(song_filename, 'blue'))
 
-                # We only support FLAC and MP3
-                if os.path.exists(song_path+'.flac') or os.path.exists(song_path+'.mp3'):
+                # We only support MP3
+                if os.path.exists(song_path+'.mp3'):
                     bar()
                     continue
 
@@ -72,8 +72,8 @@ def download_track(track):
         song_filename = format_song_filename(ART_NAME, SNG_TITLE)
         song_path = os.path.join(playlist_dir, song_filename)
         
-        # We only support FLAC and MP3
-        if os.path.exists(song_path+'.flac') or os.path.exists(song_path+'.mp3'):
+        # We only support MP3
+        if os.path.exists(song_path+'.mp3'):
             return
 
         download_song(data, song_path)
@@ -109,8 +109,8 @@ def download_all_playlists():
                     song_filename = format_song_filename(ART_NAME, SNG_TITLE)
                     song_path = os.path.join(playlist_dir, song_filename)
                     
-                    # We only support FLAC and MP3
-                    if os.path.exists(song_path+'.flac') or os.path.exists(song_path+'.mp3'):
+                    # We only support MP3
+                    if os.path.exists(song_path+'.mp3'):
                         tmp_counter += 1
                         continue
 
