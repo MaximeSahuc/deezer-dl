@@ -303,12 +303,6 @@ def download_song(song, output_file):
             fh = requests.get(url)
 
         if fh.status_code != 200:
-            # I don't why this happens. to reproduce:
-            # go to https://www.deezer.com/de/playlist/1180748301
-            # search for Moby
-            # open in a new tab the song Moby - Honey
-            # this will give you a 404!?
-            # but you can play the song in the browser
             song_title = song['SNG_TITLE']
             artist_name = song['ART_NAME']
             

@@ -30,6 +30,7 @@ def download_favorites():
                 track = get_song_infos_from_deezer_website(TYPE_TRACK, song_id)
             except Exception as e:
                 print(e)
+                progress_bar()
                 continue
             
             song_title = track['SNG_TITLE']
