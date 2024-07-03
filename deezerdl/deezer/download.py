@@ -90,10 +90,9 @@ def download_playlist(playlist):
             song_title = track['SNG_TITLE']
             artist_name = track['ART_NAME']
             
-            progress_bar.text(' - ' + colored(song_filename, 'blue'))
-
             song_filename = format_song_filename(artist_name, song_title)
-
+            progress_bar.text(' - ' + colored(song_filename, 'blue'))
+            
             # Download track
             if config["deezer"]["use_hard_links"]:
                 song_download_path = os.path.join(config['deezer']['music_dir'], 'Tracks', song_filename + '.mp3') # Download song to 'Tracks' folder
