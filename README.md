@@ -5,7 +5,7 @@ Download music directly from deezer. (Linux only)
 ## Install
 
 ```
-pip install -U git+https://github.com/MaximeSahuc/deezer-dl.git
+pip install -U git+https://github.com/MaximeSahuc/deezer-dl.git --force
 ```
 
 ## Feature

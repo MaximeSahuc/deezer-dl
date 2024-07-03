@@ -3,10 +3,10 @@
 from setuptools import setup, find_packages
 
 setup(name='deezer-dl',
-      version='0.3',
+      version='0.7',
       description='Deezer music downloader',
-      author='Lola',
-      author_email='me@laflemme.lol',
+      author='Lola, Maxime',
+      author_email='',
       packages=['deezerdl', 'deezer'],
       package_dir={'deezerdl': 'deezerdl', 'deezer': 'deezerdl/deezer'},
       entry_points = {
