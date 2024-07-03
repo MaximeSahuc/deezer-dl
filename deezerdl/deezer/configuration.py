@@ -7,8 +7,8 @@ config_file = "settings.ini"
 config = ConfigParser()
 
 def create_config_file(path):
-        f = open(config_path, 'w')
-        f.write(
+    f = open(config_path, 'w')
+    f.write(
 """[deezer]
 ; login manually using your web browser and take the ARL cookie
 cookie_arl = your_arl_cookie
@@ -23,8 +23,8 @@ use_hard_links = True
 
 ; deezer country
 country = us"""
-        )
-        f.close()
+    )
+    f.close()
 
 
 def load_config(config_path):
@@ -32,6 +32,9 @@ def load_config(config_path):
 
     if "DEEZER_COOKIE_ARL" in os.environ.keys():
         config["deezer"]["cookie_arl"] = os.environ["DEEZER_COOKIE_ARL"]
+
+    if "DEEZER_COUNTRY" in os.environ.keys():
+        config["deezer"]["country"] = os.environ["DEEZER_COUNTRY"]
 
 
 config_folder = os.path.join(os.path.expanduser("~"), '.config', 'deezer-dl')

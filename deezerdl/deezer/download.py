@@ -24,7 +24,13 @@ def download_favorites():
     progress_bar_title = colored('Favorites', 'red')
     with alive_bar(len(favorite_playlist), bar='classic2', spinner='waves2', length=50, stats=False, elapsed=False, dual_line=True, title=progress_bar_title) as progress_bar:
         for song_id in favorite_playlist:
-            track = get_song_infos_from_deezer_website(TYPE_TRACK, song_id)
+            track = None
+
+            try:
+                track = get_song_infos_from_deezer_website(TYPE_TRACK, song_id)
+            except Exception as e:
+                print(e)
+                continue
             
             song_title = track['SNG_TITLE']
             artist_name = track['ART_NAME']
