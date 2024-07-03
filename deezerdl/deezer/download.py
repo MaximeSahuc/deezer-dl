@@ -15,13 +15,13 @@ def create_song_link(source, dest):
 
 def download_favorites():
     favorite_playlist = get_deezer_favorites(config['deezer']['user_id'])
-    playlist_path = config['deezer']['music_dir'] + '/Likes'
+    playlist_dir = config['deezer']['music_dir'] + '/Likes'
     
     # Create playlist directory
-    os.makedirs(playlist_path, exist_ok=True)
+    os.makedirs(playlist_dir, exist_ok=True)
 
     # Download playlist
-    progress_bar_title = colored(playlist_name, 'red')
+    progress_bar_title = colored('Favorites', 'red')
     with alive_bar(len(favorite_playlist), bar='classic2', spinner='waves2', length=50, stats=False, elapsed=False, dual_line=True, title=progress_bar_title) as progress_bar:
         for song_id in favorite_playlist:
             track = get_song_infos_from_deezer_website(TYPE_TRACK, song_id)
