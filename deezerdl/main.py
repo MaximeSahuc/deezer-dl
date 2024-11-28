@@ -30,6 +30,7 @@ def main() -> int:
         arg = sys.argv[1]
 
         if arg == 'check':
+            from deezer.deezer import test_deezer_login
             test_deezer_login()
 
         elif arg == 'favorites':
