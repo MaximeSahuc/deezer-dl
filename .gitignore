@@ -2,3 +2,5 @@ __pycache__
 bin/deezer-dl
 settings.ini
 .venv
+build/*
+*.egg-info/*
