@@ -4,9 +4,10 @@ import sys
 
 from deezer.download import download_favorites, download_playlist, download_track, download_all_playlists
 
-# Check if on Linux
-if not sys.platform.startswith('linux'):
-    print('Only linux is supported.')
+# Check if on Linux or MacOS
+platform = sys.platform
+if not platform.startswith('linux') and not platform.startswith('darwin'):
+    print('OS not supported yet! Supports only Linux or MacOS (darwin)')
     sys.exit(1)
 
 
