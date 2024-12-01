@@ -28,6 +28,8 @@ country = us"""
 
 
 def load_config(config_path):
+    import sys
+
     config.read(config_path)
 
     if "DEEZER_COOKIE_ARL" in os.environ.keys():
@@ -35,6 +37,9 @@ def load_config(config_path):
 
     if "DEEZER_COUNTRY" in os.environ.keys():
         config["deezer"]["country"] = os.environ["DEEZER_COUNTRY"]
+    
+    if sys.platform.startswith('darwin'):
+        config["deezer"]["use_hard_links"] = False
 
 
 config_folder = os.path.join(os.path.expanduser("~"), '.config', 'deezer-dl')
