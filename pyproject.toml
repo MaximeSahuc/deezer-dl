@@ -1,0 +1,22 @@
+[project]
+name = "deezer-dl"
+description = "Deezer-DL"
+readme = "README.md"
+version = "0.0.6"
+dependencies = [
+  "alive_progress",
+  "pycryptodome",
+  "requests",
+  "setuptools",
+  "termcolor",
+  "unidecode",
+  "pyyaml",
+]
+
+authors = [
+  {name = "Maxime Sahuc"},
+]
+
+
+[project.scripts]
+deezer-dl = "main:main"
