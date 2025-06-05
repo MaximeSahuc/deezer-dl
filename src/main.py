@@ -70,7 +70,7 @@ def main():
             if len(sys.argv) == 3:
                 user_id = sys.argv[2]
 
-            dc.get_downloader().download_all(user_id)
+            dc.get_downloader().download_all()
         case "url":
             if len(sys.argv) != 3:
                 print("Please provide an URL")
