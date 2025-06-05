@@ -184,3 +184,15 @@ class Api:
         )
 
         return playlists
+
+    def get_user_albums(self, user_id):
+        albums = self.get_users_page_profile(tab="albums", user_id=user_id)
+        albums = list(
+            [
+                {"name": playlist["ALB_TITLE"], "id": playlist["ALB_ID"]}
+                for playlist in albums
+                if playlist["__TYPE__"] == "album"
+            ]
+        )
+
+        return albums

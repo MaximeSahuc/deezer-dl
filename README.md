@@ -29,6 +29,11 @@ deezer-dl url https://www.deezer.com/xx/album/0123456789
 deezer-dl all-playlists
 ```
 
+### Download all albums of the logged-in user
+```
+deezer-dl all-albums
+```
+
 ### Download all favorite tracks of the logged-in user
 ```
 deezer-dl favorites

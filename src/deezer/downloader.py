@@ -547,6 +547,32 @@ class Downloader:
                 ],  # We can also pass an ID because the ID extraction from URL is done using regex
             )
 
+    def download_all_albums(self, prefered_audio_quality=None, download_path=None):
+        if not download_path:
+            download_path = self.client.config.get_value(
+                "downloads", "music_download_path"
+            )
+
+        if not prefered_audio_quality:
+            prefered_audio_quality = self.client.config.get_value(
+                "deezer", "prefered_audio_quality"
+            )
+
+        user_id = self.client.user_data["userId"]
+
+        # Get user's albums
+        user_albums = self.client.api.get_user_albums(user_id)
+
+        # Download each album
+        for album in user_albums:
+            self.download_album(
+                download_path=download_path,
+                prefered_audio_quality=prefered_audio_quality,
+                url=album[
+                    "id"
+                ],  # We can also pass an ID because the ID extraction from URL is done using regex
+            )
+
     def download_all(self, user_id):
         if not user_id:
             user_id = self.client.user_data["userId"]

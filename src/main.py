@@ -28,7 +28,8 @@ Download Music from Deezer
 arguments:
   url <url>      URL of a Deezer track, album or playlist 
   favorites      Download favorites tracks from user in config file
-  all-playlists  Download all playlists of the configured user""")
+  all-playlists  Download all playlists of the configured user
+  all-albums     Download all albums of the configured user""")
 
 
 def main():
@@ -61,8 +62,11 @@ def main():
 
         case "all-playlists":
             print("Downloading all playlists of the configured user.")
-
             dc.get_downloader().download_all_playlists()
+
+        case "all-albums":
+            print("Downloading all albums of the configured user.")
+            dc.get_downloader().download_all_albums()
 
         case "all":
             print("Download all favorite tracks, albums and playlist")
