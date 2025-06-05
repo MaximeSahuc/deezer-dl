@@ -1,4 +1,2 @@
-- download all playlists
-
 - text color
 - progress bar

@@ -175,15 +175,8 @@ class Downloader:
             }
             exit(1)
 
-    def download_favorites(self, user_id=None):
-        # Input validation
-        if user_id:
-            try:
-                user_id = int(user_id)
-            except ValueError:
-                raise Exception("Invalid user ID. User ID can only contains numbers")
-        else:
-            user_id = self.client.user_data["userId"]
+    def download_favorites(self):
+        user_id = self.client.user_data["userId"]
 
         # Settings
         download_path = self.client.config.get_value("downloads", "music_download_path")
@@ -573,13 +566,7 @@ class Downloader:
                 ],  # We can also pass an ID because the ID extraction from URL is done using regex
             )
 
-    def download_all(self, user_id):
-        if not user_id:
-            user_id = self.client.user_data["userId"]
-
-        # Get playlists
-        user_playlists = self.client.api.get_user_playlists(user_id)
-
-        import json
-
-        print(json.dumps(user_playlists, indent=2))
+    def download_all(self):
+        self.download_favorites()
+        self.download_all_albums()
+        self.download_all_playlists()

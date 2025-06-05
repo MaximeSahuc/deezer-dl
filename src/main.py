@@ -53,12 +53,8 @@ def main():
     # Subcommand
     match subcommand:
         case "favorites":
-            # User ID passed as command argument
-            if len(sys.argv) == 3:
-                dc.get_downloader().download_favorites(sys.argv[2])
-            else:
-                # Download favorites from logged in user
-                dc.get_downloader().download_favorites()
+            print("Downloading all favorite tracks of the configured user.")
+            dc.get_downloader().download_favorites()
 
         case "all-playlists":
             print("Downloading all playlists of the configured user.")

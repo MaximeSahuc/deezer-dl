@@ -24,6 +24,11 @@ pipx install git+https://github.com/MaximeSahuc/deezer-dl.git --force
 deezer-dl url https://www.deezer.com/xx/album/0123456789
 ```
 
+### Download all favorite tracks of the logged-in user
+```
+deezer-dl favorites
+```
+
 ### Download all playlists of the logged-in user
 ```
 deezer-dl all-playlists
@@ -34,17 +39,10 @@ deezer-dl all-playlists
 deezer-dl all-albums
 ```
 
-### Download all favorite tracks of the logged-in user
+### Download all favorite tracks, albums and playlists of the logged-in user
 ```
-deezer-dl favorites
+deezer-dl all
 ```
-
-### Download all favorite tracks of a user
-```
-deezer-dl favorites 0123456789
-```
-
-
 
 ## Acknowledgement
 
