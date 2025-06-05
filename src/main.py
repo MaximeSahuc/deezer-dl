@@ -60,20 +60,24 @@ def main():
                 dc.get_downloader().download_favorites()
 
         case "all-playlists":
-            print("Download all playlists of the configured user.")
-            raise Exception("Not implemented yet")
+            print("Downloading all playlists of the configured user.")
 
+            dc.get_downloader().download_all_playlists()
+
+        case "all":
+            print("Download all favorite tracks, albums and playlist")
+            user_id = None
+            if len(sys.argv) == 3:
+                user_id = sys.argv[2]
+
+            dc.get_downloader().download_all(user_id)
         case "url":
-            if not sys.argv[2]:
+            if len(sys.argv) != 3:
                 print("Please provide an URL")
 
             url = sys.argv[2]
-            quality = cm.get_value("deezer", "prefered_audio_quality")
 
-            dc.get_downloader().download_from_url(
-                quality,
-                url,
-            )
+            dc.get_downloader().download_from_url(url)
 
         case _:
             print("Error: invalid sub-command")

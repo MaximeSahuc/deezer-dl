@@ -119,9 +119,6 @@ class Api:
 
         return response["results"]
 
-    def get_user_favorite_tracks(self, user_id):
-        pass
-
     def get_user_notifications(self):
         json_response = self.client.request_api("POST", "deezer.userMenu")
         if not json_response:
@@ -138,8 +135,11 @@ class Api:
             "POST", "notification.markAsRead", post_data={"notif_ids": notification_ids}
         )
 
-    def get_users_page_profile(self, tab):
-        payload = {"USER_ID": self.client.user_data["userId"], "tab": tab, "nb": 10000}
+    def get_users_page_profile(self, tab, user_id=None):
+        if not user_id:
+            user_id = self.client.user_data["userId"]
+
+        payload = {"USER_ID": user_id, "tab": tab, "nb": 10000}
 
         json_response = self.client.request_api(
             "POST", "deezer.pageProfile", post_data=json.dumps(payload)
@@ -151,6 +151,7 @@ class Api:
             if len(json_response["results"]["TAB"][tab]["data"]) > 0:
                 return json_response["results"]["TAB"][tab]["data"]
             else:
+                print("Error: no data found!")
                 return []
         else:
             print(f"Error: no {tab} found")
@@ -170,3 +171,16 @@ class Api:
         else:
             print(f"Error: cannot follow user {user_id} found")
             raise
+
+    def get_user_playlists(self, user_id):
+        playlists = self.get_users_page_profile(tab="playlists", user_id=user_id)
+        playlists = list(
+            [
+                {"name": playlist["TITLE"], "id": playlist["PLAYLIST_ID"]}
+                for playlist in playlists
+                if playlist["__TYPE__"] == "playlist"
+                and playlist["PARENT_USER_ID"] == str(user_id)
+            ]
+        )
+
+        return playlists

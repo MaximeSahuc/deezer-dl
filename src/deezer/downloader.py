@@ -498,10 +498,15 @@ class Downloader:
             songs=downloaded_songs,
         )
 
-    def download_from_url(self, prefered_audio_quality, url, download_path=None):
+    def download_from_url(self, url, prefered_audio_quality=None, download_path=None):
         if not download_path:
             download_path = self.client.config.get_value(
                 "downloads", "music_download_path"
+            )
+
+        if not prefered_audio_quality:
+            prefered_audio_quality = self.client.config.get_value(
+                "deezer", "prefered_audio_quality"
             )
 
         if "track" in url:
@@ -515,3 +520,40 @@ class Downloader:
 
         else:
             print("Error: Cannot detect link type")
+
+    def download_all_playlists(self, prefered_audio_quality=None, download_path=None):
+        if not download_path:
+            download_path = self.client.config.get_value(
+                "downloads", "music_download_path"
+            )
+
+        if not prefered_audio_quality:
+            prefered_audio_quality = self.client.config.get_value(
+                "deezer", "prefered_audio_quality"
+            )
+
+        user_id = self.client.user_data["userId"]
+
+        # Get user's playlists
+        user_playlists = self.client.api.get_user_playlists(user_id)
+
+        # Download each playlist
+        for playlist in user_playlists:
+            self.download_playlist(
+                download_path=download_path,
+                prefered_audio_quality=prefered_audio_quality,
+                url=playlist[
+                    "id"
+                ],  # We can also pass an ID because the ID extraction from URL is done using regex
+            )
+
+    def download_all(self, user_id):
+        if not user_id:
+            user_id = self.client.user_data["userId"]
+
+        # Get playlists
+        user_playlists = self.client.api.get_user_playlists(user_id)
+
+        import json
+
+        print(json.dumps(user_playlists, indent=2))
