@@ -39,6 +39,12 @@ deezer-dl all-playlists
 deezer-dl all-albums
 ```
 
+
+### Download all songs and albums from given artist
+```
+deezer-dl all-from-artist <artist id or url>
+```
+
 ### Download all favorite tracks, albums and playlists of the logged-in user
 ```
 deezer-dl all

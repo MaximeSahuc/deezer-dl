@@ -45,6 +45,56 @@ class Api:
 
         return response["results"]["data"]
 
+    def get_user_favorite_artists(self, user_id):
+        next_url = f"https://api.deezer.com/user/{user_id}/artists?limit=10000000000"
+
+        # Fetch all artists ID
+        artists_list = []
+        while True:
+            response = self.client.session.get(next_url)
+            json_data = response.json()
+
+            artists = json_data["data"]
+
+            if not artists:
+                return tracks_list
+
+            for artist in artists:
+                artists_list.append(artist["id"])
+
+            if "next" in json_data:
+                next_url = json_data["next"]
+                continue
+
+            break
+
+        return artists_list
+
+    def get_all_artist_albums(self, artist_id):
+        next_url = f"https://api.deezer.com/artist/{artist_id}/albums?limit=10000000000"
+
+        # Fetch all albums ID
+        albums_list = []
+        while True:
+            response = self.client.session.get(next_url)
+            json_data = response.json()
+
+            albums = json_data["data"]
+
+            if not albums:
+                return tracks_list
+
+            for album in albums:
+                albums_list.append(album["id"])
+
+            if "next" in json_data:
+                next_url = json_data["next"]
+                continue
+
+            break
+
+        return albums_list
+
     def get_track_data(self, url):
         track_id = utils.extract_id_from_url(url)
 

@@ -26,10 +26,11 @@ def print_help():
 Download Music from Deezer
 
 arguments:
-  url <url>      URL of a Deezer track, album or playlist 
-  favorites      Download favorites tracks from user in config file
-  all-playlists  Download all playlists of the configured user
-  all-albums     Download all albums of the configured user""")
+  url <url>                             URL of a Deezer track, album or playlist 
+  favorites                             Download favorites tracks from user in config file
+  all-playlists                         Download all playlists of the configured user
+  all-albums                            Download all albums of the configured user
+  all-from-artist <artist id or url>    Download all songs and albums from given artist""")
 
 
 def main():
@@ -64,16 +65,24 @@ def main():
             print("Downloading all albums of the configured user.")
             dc.get_downloader().download_all_albums()
 
+        case "all-from-artist":
+            if len(sys.argv) != 3:
+                print("Please provide an artist ID or URL")
+                exit(1)
+
+            artist_id = sys.argv[2]
+
+            print(f"Downloading all songs from artist : {artist_id}")
+            dc.get_downloader().download_all_from_artist(artist_id)
+
         case "all":
             print("Download all favorite tracks, albums and playlist")
-            user_id = None
-            if len(sys.argv) == 3:
-                user_id = sys.argv[2]
-
             dc.get_downloader().download_all()
+
         case "url":
             if len(sys.argv) != 3:
                 print("Please provide an URL")
+                exit(1)
 
             url = sys.argv[2]
 

@@ -286,7 +286,9 @@ class Downloader:
         if result["error"]:
             print(f"Error: {result['message']}. Skipping.")
 
-    def download_album(self, download_path, prefered_audio_quality, url):
+    def download_album(
+        self, download_path, prefered_audio_quality, url, allow_single_track_album=True
+    ):
         print(f"Download album: {url} - {download_path}")
 
         album_data = self.client.api.get_album_data(url)
@@ -308,12 +310,15 @@ class Downloader:
             print("Error: No songs found")
             return
 
+        is_single_track_album = len(songs) == 1
+
         # Create album directory
-        sanitized_album_name = utils.sanitize_folder_name(
-            name=album_name, item_id=album_id
-        )
-        album_dir = os.path.join(download_path, "Albums", sanitized_album_name)
-        os.makedirs(album_dir, exist_ok=True)
+        if not is_single_track_album and not allow_single_track_album:
+            sanitized_album_name = utils.sanitize_folder_name(
+                name=album_name, item_id=album_id
+            )
+            album_dir = os.path.join(download_path, "Albums", sanitized_album_name)
+            os.makedirs(album_dir, exist_ok=True)
 
         # Create 'Tracks' folder to store all songs if we should use links for duplicates files
         use_links_for_duplicates = self.client.config.get_value(
@@ -328,16 +333,17 @@ class Downloader:
             os.makedirs(tracks_dir, exist_ok=True)
 
         # Download album cover
-        album_cover_id = songs[0]["ALB_PICTURE"]
-        album_cover_url = songutils.get_picture_link(album_cover_id)
-        album_cover_file = os.path.join(album_dir, "cover.jpg")
+        if not is_single_track_album and not allow_single_track_album:
+            album_cover_id = songs[0]["ALB_PICTURE"]
+            album_cover_url = songutils.get_picture_link(album_cover_id)
+            album_cover_file = os.path.join(album_dir, "cover.jpg")
 
-        if not os.path.exists(album_cover_file):
-            utils.download_image(
-                self.client.session,
-                file_output=album_cover_file,
-                url=album_cover_url,
-            )
+            if not os.path.exists(album_cover_file):
+                utils.download_image(
+                    self.client.session,
+                    file_output=album_cover_file,
+                    url=album_cover_url,
+                )
 
         # Download songs
         for song in songs:
@@ -353,7 +359,9 @@ class Downloader:
             )
 
             # When using links for duplicates
-            if use_links_for_duplicates:
+            if use_links_for_duplicates or (
+                is_single_track_album and not allow_single_track_album
+            ):
                 # Download song to 'Tracks' folder
                 result = self._download_song(
                     prefered_audio_quality=prefered_audio_quality,
@@ -363,6 +371,9 @@ class Downloader:
 
                 if result["error"]:
                     print(f"Error: {result['message']}. Skipping.")
+                    continue
+
+                if is_single_track_album and not allow_single_track_album:
                     continue
 
                 song_file_path_in_tracks = result["output_file_full_path"]
@@ -566,6 +577,35 @@ class Downloader:
                 url=album[
                     "id"
                 ],  # We can also pass an ID because the ID extraction from URL is done using regex
+            )
+
+    def download_all_from_artist(
+        self, artist_id, prefered_audio_quality=None, download_path=None
+    ):
+        if not download_path:
+            download_path = self.client.config.get_value(
+                "downloads", "music_download_path"
+            )
+
+        if not prefered_audio_quality:
+            prefered_audio_quality = self.client.config.get_value(
+                "deezer", "prefered_audio_quality"
+            )
+
+        artist_albums = self.client.api.get_all_artist_albums(artist_id)
+
+        if len(artist_albums) == 0:
+            print(f"No album found for artist: {artist_id}, skipping")
+            return
+
+        print(f"Downloading {len(artist_albums)} albums from artist...")
+
+        for album_id in artist_albums:
+            self.download_album(
+                download_path,
+                prefered_audio_quality,
+                album_id,
+                allow_single_track_album=False,
             )
 
     def download_all(self):

@@ -58,7 +58,7 @@ def extract_id_from_url(url):
     import re
 
     try:
-        return re.search(r"\d+", url).group(0)
+        return re.search(r"\d+", str(url)).group(0)
     except AttributeError:
         print(f"Error: Regex (\\d+) for url failed. You gave me '{url}'")
         return None
