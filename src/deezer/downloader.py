@@ -291,9 +291,10 @@ class Downloader:
 
         album_data = self.client.api.get_album_data(url)
 
-        # Album name
+        # Album infos
         album_name = album_data.get("data", [])[0].get("ALB_TITLE")
-        print(f"Downloading album: {album_name}")
+        album_id = album_data.get("data", [])[0].get("ALB_ID")
+        print(f"Downloading album: {album_name} - {album_id}")
 
         # Number of songs
         song_count = album_data.get("total")
@@ -309,7 +310,7 @@ class Downloader:
 
         # Create album directory
         sanitized_album_name = utils.sanitize_folder_name(
-            name=album_name, item_type="album"
+            name=album_name, item_id=album_id
         )
         album_dir = os.path.join(download_path, "Albums", sanitized_album_name)
         os.makedirs(album_dir, exist_ok=True)
@@ -392,9 +393,10 @@ class Downloader:
     def download_playlist(self, download_path, prefered_audio_quality, url):
         playlist_data = self.client.api.get_playlist_data(url)
 
-        # Playlist name
+        # Playlist infos
         playlist_name = playlist_data.get("DATA", {}).get("TITLE")
-        print(f"Downloading playlist: {playlist_name}")
+        playlist_id = playlist_data.get("DATA", {}).get("PLAYLIST_ID")
+        print(f"Downloading playlist: {playlist_name} - {playlist_id}")
 
         # Number of songs
         song_count = playlist_data.get("DATA", {}).get("NB_SONG")
@@ -410,7 +412,7 @@ class Downloader:
 
         # Create playlist directory
         sanitized_playlist_name = utils.sanitize_folder_name(
-            name=playlist_name, item_type="playlist"
+            name=playlist_name, item_id=playlist_id
         )
         playlist_dir = os.path.join(download_path, "Playlists", sanitized_playlist_name)
         os.makedirs(playlist_dir, exist_ok=True)

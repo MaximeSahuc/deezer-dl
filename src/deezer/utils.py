@@ -8,16 +8,12 @@ def get_song_filename(song_artist, song_title, file_extension=None):
     return filename.replace("/", "\u2215")
 
 
-def sanitize_folder_name(name, item_type):
+def sanitize_folder_name(name, item_id):
     import re
-    import random
     from unidecode import unidecode
 
-    # Generate a unique 6-digit hex suffix (e.g. "_a3b7f2")
-    hex_suffix = f"_{random.getrandbits(24):06x}"
-
-    # Default name in case of invalid input (e.g. "playlist_a3b7f2")
-    default_name = f"{item_type}{hex_suffix}"
+    # Default name in case of invalid input
+    default_name = item_id
 
     # Default name for empty or whitespace-only inputs
     if not name.strip():
