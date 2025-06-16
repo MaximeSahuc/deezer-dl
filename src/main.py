@@ -30,7 +30,8 @@ arguments:
   favorites                             Download favorites tracks from user in config file
   all-playlists                         Download all playlists of the configured user
   all-albums                            Download all albums of the configured user
-  all-from-artist <artist id or url>    Download all songs and albums from given artist""")
+  all-from-artist <artist id or url>    Download all songs and albums from given artist
+  all-from-favorite-artists [user id]   Download all songs and albums from favorite artists of the specified user or configured user""")
 
 
 def main():
@@ -74,6 +75,14 @@ def main():
 
             print(f"Downloading all songs from artist : {artist_id}")
             dc.get_downloader().download_all_from_artist(artist_id)
+
+        case "all-from-favorite-artists":
+            user_id = None
+
+            if len(sys.argv) == 3:
+                user_id = sys.argv[2]
+
+            dc.get_downloader().download_all_from_favorite_artists(user_id)
 
         case "all":
             print("Download all favorite tracks, albums and playlist")

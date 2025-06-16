@@ -608,6 +608,22 @@ class Downloader:
                 allow_single_track_album=False,
             )
 
+    def download_all_from_favorite_artists(self, user_id=None):
+        if not user_id:
+            user_id = self.client.user_data["userId"]
+
+        user_favorite_artists = self.client.api.get_user_favorite_artists(user_id)
+
+        if len(user_favorite_artists) == 0:
+            print(f"User {user_id} dont have any favorite artist !")
+            return
+
+        print(f"Found {len(user_favorite_artists)} artists, downloading...")
+
+        for artist_id in user_favorite_artists:
+            print(f"Downloading all from artist {artist_id}")
+            self.download_all_from_artist(artist_id)
+
     def download_all(self):
         self.download_favorites()
         self.download_all_albums()
