@@ -473,6 +473,11 @@ class Downloader:
         playlist_dir = os.path.join(download_path, "Playlists", sanitized_playlist_name)
         os.makedirs(playlist_dir, exist_ok=True)
 
+        # Save API response
+        api_response_file = os.path.join(playlist_dir, "playlist_data.json")
+        with open(api_response_file, "w") as fo:
+            fo.write(json.dumps(playlist_data, indent=2))
+
         # Create 'Tracks' folder to store all songs if we should use links for duplicates files
         use_links_for_duplicates = self.client.config.get_value(
             "downloads", "use_links_for_duplicates"
