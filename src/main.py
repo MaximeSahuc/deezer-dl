@@ -7,9 +7,7 @@ from deezer.config import ConfigManager
 from deezer.client import DeezerClient
 
 
-CONFIG_FILE_PATH = os.path.join(
-    os.path.expanduser("~"), ".config", "deezer-dl", "config.yml"
-)
+CONFIG_FILE_PATH = os.path.join(os.path.expanduser("~"), ".deezer-dl", "config.yml")
 
 
 def check_requirements():

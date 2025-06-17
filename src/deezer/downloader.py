@@ -4,9 +4,13 @@ import deezer.utils as utils
 import deezer.songutils as songutils
 
 
+ERROR_LOG_FILE_PATH = os.path.join(os.path.expanduser("~"), ".deezer-dl", "errors.log")
+
+
 class Downloader:
     def __init__(self, deezer_client):
         self.client = deezer_client
+        self._init_error_log_file()
 
     def _get_preferred_audio_quality(self, preferred__audio_quality: str) -> list[dict]:
         all_qualities = [
@@ -14,6 +18,7 @@ class Downloader:
             {"cipher": "BF_CBC_STRIPE", "format": "MP3_320"},
             {"cipher": "BF_CBC_STRIPE", "format": "MP3_128"},
             {"cipher": "BF_CBC_STRIPE", "format": "MP3_64"},
+            {"cipher": "BF_CBC_STRIPE", "format": "MP3_MISC"},
         ]
 
         preferred_qualities = []
@@ -50,10 +55,10 @@ class Downloader:
         req = requests.post(api_url, json=payload)
 
         if req.status_code != 200:
-            print(
-                f"Error, received status {req.status_code} when getting download URLs for song {song_id}"
-            )
-            return None
+            return {
+                "error": True,
+                "message": f"Received status {req.status_code} when getting download URLs for song {song_id}",
+            }
 
         rcv_data = req.json()
         data = rcv_data["data"]
@@ -61,22 +66,37 @@ class Downloader:
         if data and len(data) > 0:
             if "media" not in data[0]:
                 if data[0]["errors"]:
-                    print(f"Error: {data[0]['errors'][0]['message']}")
-                    return None
+                    return {"error": True, "message": data[0]["errors"][0]["message"]}
                 else:
                     print(
                         "Error: 'media' item not found when requesting for song download URL"
                     )
 
             if len(data[0]["media"]) == 0:
-                print("Error: No media found")
-                return None
+                return {"error": True, "message": "No media found"}
 
             media = data[0]["media"][0]
             media_url = media["sources"][0]["url"]
             media_format = media["format"].lower()
 
             return {"format": media_format, "url": media_url}
+
+    def _init_error_log_file(self):
+        # Create directory and delete previous logs
+        os.makedirs(os.path.basename(ERROR_LOG_FILE_PATH), exist_ok=True)
+        if os.path.exists(ERROR_LOG_FILE_PATH):
+            os.remove(ERROR_LOG_FILE_PATH)
+
+        # Create log file
+        open(ERROR_LOG_FILE_PATH, "x")
+
+    def _log_error(self, message):
+        with open(ERROR_LOG_FILE_PATH, "r") as lf:
+            if message in lf.read():
+                return
+
+        with open(ERROR_LOG_FILE_PATH, "a") as lf:
+            lf.write(message + "\n")
 
     def _download_song(self, prefered_audio_quality, song_data, output_path):
         import requests
@@ -118,8 +138,19 @@ class Downloader:
             track_token, prefered_audio_quality, song_id
         )
 
-        if not song_infos:
-            return {"error": True, "message": "Error: Could not get song download URL"}
+        if "error" in song_infos:
+            song_filename = utils.get_song_filename(artist_name, song_title)
+
+            if "FALLBACK" in song_data:
+                print("Main source not working, trying fallback source...")
+                return self._download_song(
+                    prefered_audio_quality,
+                    song_data=song_data["FALLBACK"],
+                    output_path=output_path,
+                )
+            else:
+                self._log_error(f"{song_id} | {song_filename}")
+                return song_infos
 
         song_media_format = song_infos["format"]
         song_download_url = song_infos["url"]
