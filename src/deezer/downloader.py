@@ -293,6 +293,10 @@ class Downloader:
 
         album_data = self.client.api.get_album_data(url)
 
+        if len(album_data["data"]) == 0:
+            print(f"Error, album: {url} looks empty, skipping")
+            return
+
         # Album infos
         album_name = album_data.get("data", [])[0].get("ALB_TITLE")
         album_id = album_data.get("data", [])[0].get("ALB_ID")
@@ -403,6 +407,10 @@ class Downloader:
 
     def download_playlist(self, download_path, prefered_audio_quality, url):
         playlist_data = self.client.api.get_playlist_data(url)
+
+        if len(playlist_data["data"]) == 0:
+            print(f"Error, playlist: {url} looks empty, skipping")
+            return
 
         # Playlist infos
         playlist_name = playlist_data.get("DATA", {}).get("TITLE")
