@@ -251,11 +251,11 @@ class Downloader:
 
             # When NOT using links for duplicates
             else:
-                # Download song to its playlist folder
+                # Download song to its 'Favorites' folder
                 result = self._download_song(
                     prefered_audio_quality=prefered_audio_quality,
                     song_data=song,
-                    output_path=album_dir,
+                    output_path=favorites_dir,
                 )
 
                 if result["error"]:

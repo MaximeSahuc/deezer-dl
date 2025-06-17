@@ -57,7 +57,7 @@ class Api:
             artists = json_data["data"]
 
             if not artists:
-                return tracks_list
+                return artists_list
 
             for artist in artists:
                 artists_list.append(artist["id"])
@@ -82,7 +82,7 @@ class Api:
             albums = json_data["data"]
 
             if not albums:
-                return tracks_list
+                return albums_list
 
             for album in albums:
                 albums_list.append(album["id"])
