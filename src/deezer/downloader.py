@@ -1,4 +1,5 @@
 import os
+import json
 import deezer.utils as utils
 import deezer.songutils as songutils
 
@@ -300,7 +301,27 @@ class Downloader:
         # Album infos
         album_name = album_data.get("data", [])[0].get("ALB_TITLE")
         album_id = album_data.get("data", [])[0].get("ALB_ID")
-        print(f"Downloading album: {album_name} - {album_id}")
+        album_artist = album_data.get("data", [])[0].get("ART_NAME")
+        print(f"Downloading album: {album_artist} - {album_name}")
+
+        # Get album release year
+        album_release_date = None
+        album_release_year = None
+        if "ORIGINAL_RELEASE_DATE" in album_data.get("data", [])[0]:
+            album_release_date = album_data.get("data", [])[0].get(
+                "ORIGINAL_RELEASE_DATE"
+            )
+        elif "PHYSICAL_RELEASE_DATE" in album_data.get("data", [])[0]:
+            album_release_date = album_data.get("data", [])[0].get(
+                "PHYSICAL_RELEASE_DATE"
+            )
+        elif "DIGITAL_RELEASE_DATE" in album_data.get("data", [])[0]:
+            album_release_date = album_data.get("data", [])[0].get(
+                "DIGITAL_RELEASE_DATE"
+            )
+
+        if album_release_date:
+            album_release_year = album_release_date.split("-")[0]
 
         # Number of songs
         song_count = album_data.get("total")
@@ -316,13 +337,24 @@ class Downloader:
 
         is_single_track_album = len(songs) == 1
 
+        sanitized_album_name = utils.sanitize_folder_name(
+            name=album_name, item_id=album_id
+        )
+
+        if album_release_year:
+            sanitized_album_name = f"[{album_release_year}] {sanitized_album_name}"
+
+        album_dir = os.path.join(
+            download_path, "Artists", album_artist, sanitized_album_name
+        )
+
         # Create album directory
-        if not is_single_track_album and not allow_single_track_album:
-            sanitized_album_name = utils.sanitize_folder_name(
-                name=album_name, item_id=album_id
-            )
-            album_dir = os.path.join(download_path, "Albums", sanitized_album_name)
+        if allow_single_track_album or not is_single_track_album:
             os.makedirs(album_dir, exist_ok=True)
+            # Save API response
+            api_response_file = os.path.join(album_dir, "album_data.json")
+            with open(api_response_file, "w") as fo:
+                fo.write(json.dumps(album_data, indent=2))
 
         # Create 'Tracks' folder to store all songs if we should use links for duplicates files
         use_links_for_duplicates = self.client.config.get_value(

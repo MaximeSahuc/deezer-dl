@@ -25,7 +25,7 @@ def sanitize_folder_name(name, item_id):
     sanitized_name = unidecode(sanitized_name)
 
     # Replace spaces and other problematic characters with underscores
-    sanitized_name = re.sub(r"[^a-zA-Z0-9_]+", "_", sanitized_name)
+    sanitized_name = re.sub(r"[^a-zA-Z0-9_\s]+", "_", sanitized_name)
 
     # Collapse multiple consecutive underscores into a single underscore
     sanitized_name = re.sub(r"_{2,}", "_", sanitized_name)
