@@ -445,7 +445,7 @@ class Downloader:
     def download_playlist(self, download_path, prefered_audio_quality, url):
         playlist_data = self.client.api.get_playlist_data(url)
 
-        if len(playlist_data["data"]) == 0:
+        if len(playlist_data["DATA"]) == 0:
             print(f"Error, playlist: {url} looks empty, skipping")
             return
 
