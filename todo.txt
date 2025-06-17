@@ -1,2 +1,5 @@
+- add cover to already downloaded songs without cover
+- detect encrypted files and decrypt them
+
 - text color
 - progress bar
