@@ -24,14 +24,14 @@ def writeid3v1_1(fo, song):
     def song_get(song, key):
         try:
             return song.get(key).encode("utf-8")
-        except:
+        except:  # noqa: E722
             return b""
 
     def album_get(key):
         global album_Data
         try:
             return album_Data.get(key).encode("utf-8")
-        except:
+        except:  # noqa: E722
             return b""
 
     # what struct.pack expects
@@ -94,14 +94,14 @@ def writeid3v2(session, fo, song):
         global album_Data
         try:
             return album_Data.get(key)
-        except:
+        except:  # noqa: E722
             # raise
             return ""
 
     def song_get(song, key):
         try:
             return song[key]
-        except:
+        except:  # noqa: E722
             # raise
             return ""
 
@@ -148,7 +148,7 @@ def writeid3v2(session, fo, song):
     try:
         phyDate_YYYYMMDD = album_get("PHYSICAL_RELEASE_DATE").split("-")  #'2008-11-21'
         phyDate_DDMM = phyDate_YYYYMMDD[2] + phyDate_YYYYMMDD[1]
-    except:
+    except:  # noqa: E722
         phyDate_DDMM = ""
 
     # get size of first item in the list that is not 0
@@ -164,13 +164,13 @@ def writeid3v2(session, fo, song):
             )
             if song_get(song, i)
         ][0]
-    except:
+    except:  # noqa: E722
         FileSize = 0
 
     try:
         track = "%02s" % song["TRACK_NUMBER"]
         track += "/%02s" % album_get("TRACKS")
-    except:
+    except:  # noqa: E722
         pass
 
     # http://id3.org/id3v2.3.0#Attached_picture

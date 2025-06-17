@@ -21,7 +21,7 @@ def calcbfkey(songid):
     key = b"g4el58wc0zvf9na1"
     songid_md5 = md5hex(songid.encode())
 
-    xor_op = lambda i: chr(songid_md5[i] ^ songid_md5[i + 16] ^ key[i])
+    xor_op = lambda i: chr(songid_md5[i] ^ songid_md5[i + 16] ^ key[i])  # noqa: E731
     decrypt_key = "".join([xor_op(i) for i in range(16)])
     return decrypt_key
 
