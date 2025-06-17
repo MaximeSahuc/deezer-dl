@@ -85,6 +85,11 @@ class Downloader:
         song_title = song_data["SNG_TITLE"]
         artist_name = song_data["ART_NAME"]
         song_id = song_data["SNG_ID"]
+
+        if "VERSION" in song_data:
+            if song_data["VERSION"] != "":
+                song_title = f"{song_title} {song_data['VERSION']}"
+
         track_token = song_data["TRACK_TOKEN"]
         key = crypto.calcbfkey(song_id)
 
