@@ -186,3 +186,70 @@ class DeezerClient:
 
     def get_downloader(self):
         return self.downloader
+
+    def export_all_user_data(self, user_id=None):
+        import os
+        from deezer.utils import write_to_json, sanitize_folder_name
+
+        if not user_id:
+            user_id = self.user_data["userId"]
+
+        user_infos = self.api.get_user_infos(user_id)
+        if not user_infos:
+            print("User not found!")
+            exit(1)
+
+        DEBUG_DATA_DIR = os.path.join(
+            os.path.expanduser("~"), ".deezer-dl", "user-data", user_infos["name"]
+        )
+
+        print(f"Starting user data export for user: {user_infos['name']}")
+
+        # Export user infos
+        print("Exporting user infos...")
+        write_to_json(DEBUG_DATA_DIR, "user_infos.json", user_infos)
+
+        # Dump user's favorite tracks
+        print("Exporting favorite tracks...")
+        user_favorite_tracks = self.api.get_user_favorites_tracks(user_id)
+        if user_favorite_tracks:
+            write_to_json(DEBUG_DATA_DIR, "favorite_tracks.json", user_favorite_tracks)
+
+        # Dump user's playlists
+        print("Dumping user's playlists...")
+        user_playlists = self.api.get_user_playlists(user_id)
+        playlist_data_dir = os.path.join(DEBUG_DATA_DIR, "playlists")
+        if user_playlists:
+            for playlist in user_playlists:
+                print(f"Dumping playlist: {playlist['name']}")
+                playlist_data = self.api.get_playlist_data(playlist["id"])
+                sanitized_playlist_name = sanitize_folder_name(
+                    playlist["name"], playlist["id"]
+                )
+                write_to_json(
+                    playlist_data_dir, f"{sanitized_playlist_name}.json", playlist_data
+                )
+
+        # Dump user's saved albums
+        print("Dumping user's saved albums...")
+        user_albums = self.api.get_user_albums(user_id)
+        album_data_dir = os.path.join(DEBUG_DATA_DIR, "albums")
+        if user_albums:
+            for album in user_albums:
+                print(f"Dumping album: {album['name']}")
+                album_data = self.api.get_album_data(album["id"])
+                sanitized_album_name = sanitize_folder_name(album["name"], album["id"])
+                write_to_json(
+                    album_data_dir, f"{sanitized_album_name}.json", album_data
+                )
+
+        # Dump user's favotite artists
+        print("Dumping user's favorite artists")
+        user_favorite_artists = self.api.get_user_favorite_artists(user_id)
+        if user_favorite_artists:
+            write_to_json(
+                DEBUG_DATA_DIR, "favorite_artists.json", user_favorite_artists
+            )
+
+        print("\nDone!")
+        print(f"Data location: {DEBUG_DATA_DIR}")

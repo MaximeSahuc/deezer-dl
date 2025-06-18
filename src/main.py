@@ -19,18 +19,19 @@ def check_requirements():
 
 
 def print_help():
-    print("""Usage: deezer-dl url [check] [favorites]
+    print("""Usage: deezer-dl <argument>
 
 Download Music from Deezer
 
 arguments:
-  url <url>                             URL of a Deezer track, album or playlist 
-  favorites                             Download favorites tracks from user in config file
-  all                                   Download all favorite tracks, albums and playlists of the configured user
-  all-playlists                         Download all playlists of the configured user
-  all-albums                            Download all albums of the configured user
-  all-from-artist <artist id or url>    Download all songs and albums from given artist
-  all-from-favorite-artists [user id]   Download all songs and albums from favorite artists of the specified user or configured user""")
+  url <url>                              URL of a Deezer track, album or playlist 
+  favorites                              Download favorites tracks from user in config file
+  all                                    Download all favorite tracks, albums and playlists of the configured user
+  all-playlists                          Download all playlists of the configured user
+  all-albums                             Download all albums of the configured user
+  all-from-artist <artist id or url>     Download all songs and albums from given artist
+  all-from-favorite-artists [user id]    Download all songs and albums from favorite artists of the specified user or configured user
+  export-all-user-data [user id]         Export all user data as json files: favorite tracks, playlists, saved albums, favorite artists""")
 
 
 def main():
@@ -95,6 +96,13 @@ def main():
             url = sys.argv[2]
 
             dc.get_downloader().download_from_url(url)
+
+        case "export-all-user-data":
+            user_id = None
+            if len(sys.argv) == 3:
+                user_id = sys.argv[2]
+
+            dc.export_all_user_data(user_id)
 
         case _:
             print("Error: invalid sub-command")

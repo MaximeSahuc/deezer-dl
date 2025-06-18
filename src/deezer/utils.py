@@ -70,3 +70,19 @@ def download_image(session, file_output, url):
 
     with open(file_output, "wb") as of:
         of.write(picture_bytes)
+
+
+def write_to_file(output_dir, file_name, data):
+    import os
+
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    with open(os.path.join(output_dir, file_name), "w") as of:
+        of.write(data)
+
+
+def write_to_json(output_dir, file_name, data):
+    import json
+
+    write_to_file(output_dir, file_name, json.dumps(data, ensure_ascii=False, indent=2))

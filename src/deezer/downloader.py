@@ -701,9 +701,9 @@ class Downloader:
 
         print(f"Found {len(user_favorite_artists)} artists, downloading...")
 
-        for artist_id in user_favorite_artists:
-            print(f"Downloading all from artist {artist_id}")
-            self.download_all_from_artist(artist_id)
+        for artist in user_favorite_artists:
+            print(f"Downloading all from artist {artist['id']}")
+            self.download_all_from_artist(artist["id"])
 
     def download_all(self):
         self.download_favorites()

@@ -60,7 +60,7 @@ class Api:
                 return artists_list
 
             for artist in artists:
-                artists_list.append(artist["id"])
+                artists_list.append({"id": artist["id"], "name": artist["name"]})
 
             if "next" in json_data:
                 next_url = json_data["next"]
@@ -94,6 +94,16 @@ class Api:
             break
 
         return albums_list
+
+    def get_user_infos(self, user_id):
+        url = f"https://api.deezer.com/user/{user_id}/"
+
+        response = self.client.session.get(url)
+
+        if response.ok:
+            return response.json()
+
+        return None
 
     def get_track_data(self, url):
         track_id = utils.extract_id_from_url(url)
