@@ -326,11 +326,17 @@ class Downloader:
             print(f"Error: {result['message']}. Skipping.")
 
     def download_album(
-        self, download_path, prefered_audio_quality, url, allow_single_track_album=True
+        self,
+        download_path,
+        prefered_audio_quality,
+        url,
+        album_data=None,
+        allow_single_track_album=True,
     ):
         print(f"Download album: {url} - {download_path}")
 
-        album_data = self.client.api.get_album_data(url)
+        if not album_data:
+            album_data = self.client.api.get_album_data(url)
 
         if len(album_data["data"]) == 0:
             print(f"Error, album: {url} looks empty, skipping")
@@ -665,6 +671,10 @@ class Downloader:
     def download_all_from_artist(
         self, artist_id, prefered_audio_quality=None, download_path=None
     ):
+        from deezer.utils import extract_id_from_url
+
+        artist_id = extract_id_from_url(artist_id)
+
         if not download_path:
             download_path = self.client.config.get_value(
                 "downloads", "music_download_path"
@@ -681,15 +691,19 @@ class Downloader:
             print(f"No album found for artist: {artist_id}, skipping")
             return
 
-        print(f"Downloading {len(artist_albums)} albums from artist...")
+        print("Downloading albums from artist...")
+        for album in artist_albums:
+            album_data = self.client.api.get_album_data(album["id"])
 
-        for album_id in artist_albums:
-            self.download_album(
-                download_path,
-                prefered_audio_quality,
-                album_id,
-                allow_single_track_album=False,
-            )
+            # Check if artists IDs match
+            if artist_id == album_data.get("data", [])[0].get("ART_ID"):
+                self.download_album(
+                    download_path,
+                    prefered_audio_quality,
+                    album["id"],
+                    allow_single_track_album=False,
+                    album_data=album_data,
+                )
 
     def download_all_from_favorite_artists(self, user_id=None):
         if not user_id:

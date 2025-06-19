@@ -71,6 +71,8 @@ class Api:
         return artists_list
 
     def get_all_artist_albums(self, artist_id):
+        artist_id = utils.extract_id_from_url(artist_id)
+
         next_url = f"https://api.deezer.com/artist/{artist_id}/albums?limit=10000000000"
 
         # Fetch all albums ID
@@ -85,7 +87,7 @@ class Api:
                 return albums_list
 
             for album in albums:
-                albums_list.append(album["id"])
+                albums_list.append({"id": album["id"], "name": album["title"]})
 
             if "next" in json_data:
                 next_url = json_data["next"]
