@@ -392,6 +392,8 @@ class Downloader:
             download_path, "Artists", album_artist, sanitized_album_name
         )
 
+        singles_dir = os.path.join(download_path, "Artists", album_artist, "Singles")
+
         # Create album directory
         if allow_single_track_album or not is_single_track_album:
             os.makedirs(album_dir, exist_ok=True)
@@ -399,6 +401,11 @@ class Downloader:
             api_response_file = os.path.join(album_dir, "album_data.json")
             with open(api_response_file, "w") as fo:
                 fo.write(json.dumps(album_data, indent=2))
+
+        # Create directory for Singles
+        if not allow_single_track_album and is_single_track_album:
+            os.makedirs(singles_dir, exist_ok=True)
+            album_dir = singles_dir
 
         # Create 'Tracks' folder to store all songs if we should use links for duplicates files
         use_links_for_duplicates = self.client.config.get_value(
@@ -439,9 +446,7 @@ class Downloader:
             )
 
             # When using links for duplicates
-            if use_links_for_duplicates or (
-                is_single_track_album and not allow_single_track_album
-            ):
+            if use_links_for_duplicates:
                 # Download song to 'Tracks' folder
                 result = self._download_song(
                     prefered_audio_quality=prefered_audio_quality,
@@ -451,9 +456,6 @@ class Downloader:
 
                 if result["error"]:
                     print(f"Error: {result['message']}. Skipping.")
-                    continue
-
-                if is_single_track_album and not allow_single_track_album:
                     continue
 
                 song_file_path_in_tracks = result["output_file_full_path"]

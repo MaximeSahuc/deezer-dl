@@ -2,7 +2,7 @@
 name = "deezer-dl"
 description = "Deezer-DL"
 readme = "README.md"
-version = "0.1.7"
+version = "0.1.8"
 dependencies = [
   "alive_progress",
   "pycryptodome",
