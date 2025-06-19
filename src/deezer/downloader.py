@@ -82,10 +82,12 @@ class Downloader:
             return {"format": media_format, "url": media_url}
 
     def _init_error_log_file(self):
-        # Create directory and delete previous logs
-        os.makedirs(os.path.basename(ERROR_LOG_FILE_PATH), exist_ok=True)
+        # Delete previous logs
         if os.path.exists(ERROR_LOG_FILE_PATH):
             os.remove(ERROR_LOG_FILE_PATH)
+
+        # Create directory
+        os.makedirs(os.path.basename(ERROR_LOG_FILE_PATH), exist_ok=True)
 
         # Create log file
         open(ERROR_LOG_FILE_PATH, "x")
