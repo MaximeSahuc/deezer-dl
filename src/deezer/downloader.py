@@ -305,10 +305,35 @@ class Downloader:
 
         track_data = self.client.api.get_track_data(url)
 
-        # Track name
+        # Track infos
         song_title = track_data["SNG_TITLE"]
         artist_name = track_data["ART_NAME"]
+        album_id = track_data["ALB_ID"]
+        album_title = track_data["ALB_TITLE"]
         print(f"Downloading track: {utils.get_song_filename(artist_name, song_title)}")
+
+        # Album infos
+        album_infos = self.client.api.get_album_infos(album_id)
+        album_artist = "Unknown"
+
+        if album_infos:
+            if album_infos["artist"]["name"] == "Various Artists" and "label" in album_infos:
+                album_artist = album_infos["label"]
+            else:
+                album_artist = album_infos["artist"]["name"]
+
+        album_artist = utils.sanitize_replace_slash(album_artist)
+
+        song_album_dir = os.path.join(
+            download_path,
+            "Library",
+            "Artists",
+            album_artist,
+            album_title
+        )
+
+        # Create song album dir
+        os.makedirs(song_album_dir, exist_ok=True)
 
         # Create 'Tracks' directory
         tracks_dir = os.path.join(download_path, "Tracks")
@@ -323,6 +348,34 @@ class Downloader:
 
         if result["error"]:
             print(f"Error: {result['message']}. Skipping.")
+
+        # Download album cover
+        album_cover_id = track_data["ALB_PICTURE"]
+        album_cover_file = os.path.join(song_album_dir, "cover.jpg")
+        if not os.path.exists(album_cover_file):
+            album_cover_url = songutils.get_picture_link(album_cover_id)
+            utils.download_image(
+                self.client.session,
+                file_output=album_cover_file,
+                url=album_cover_url,
+            )
+
+        song_file_path_in_tracks = result["output_file_full_path"]
+        song_file_name = result["output_file_name"]
+        song_file_path_in_album = os.path.join(
+            song_album_dir, song_file_name
+        )
+
+        # Create song link from 'Tracks' directory to its album folder
+        duplicates_links_type = self.client.config.get_value(
+            "downloads", "duplicates_link_type"
+        )
+        if not os.path.exists(song_file_path_in_album):
+            utils.create_link(
+                src=song_file_path_in_tracks,
+                dest=song_file_path_in_album,
+                link_type=duplicates_links_type,
+            )
 
     def download_album(
         self,
