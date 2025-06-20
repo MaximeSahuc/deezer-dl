@@ -213,7 +213,10 @@ class Downloader:
             }
             exit(1)
 
-    def download_favorites(self, download_to_tracks_and_create_m3u=True,):
+    def download_favorites(
+        self,
+        download_to_tracks_and_create_m3u=True,
+    ):
         user_id = self.client.user_data["userId"]
 
         # Settings
@@ -269,7 +272,10 @@ class Downloader:
 
             if album_infos:
                 if "error" not in album_infos:
-                    if album_infos["artist"]["name"] == "Various Artists" and "label" in album_infos:
+                    if (
+                        album_infos["artist"]["name"] == "Various Artists"
+                        and "label" in album_infos
+                    ):
                         album_artist = album_infos["label"]
                     else:
                         album_artist = album_infos["artist"]["name"]
@@ -277,11 +283,7 @@ class Downloader:
             album_artist = utils.sanitize_replace_slash(album_artist)
 
             song_album_dir = os.path.join(
-                download_path,
-                "Library",
-                "Artists",
-                album_artist,
-                song["ALB_TITLE"]
+                download_path, "Library", "Artists", album_artist, song["ALB_TITLE"]
             )
 
             # Create song album dir
@@ -318,7 +320,9 @@ class Downloader:
                         favorites_dir, song_file_name
                     )
 
-                    song_file_path_in_album = os.path.join(song_album_dir, song_file_name)
+                    song_file_path_in_album = os.path.join(
+                        song_album_dir, song_file_name
+                    )
 
                     # Create song link from 'Tracks' directory to its album folder
                     if not os.path.exists(song_file_path_in_album):
@@ -372,7 +376,9 @@ class Downloader:
                         link_type=duplicates_links_type,
                     )
 
-                relative_path_in_tracks = f"Artists/{album_artist}/{song['ALB_TITLE']}/{song_file_name}"
+                relative_path_in_tracks = (
+                    f"Artists/{album_artist}/{song['ALB_TITLE']}/{song_file_name}"
+                )
 
                 # Add song to M3U playlist
                 downloaded_songs.append(relative_path_in_tracks)
@@ -381,7 +387,7 @@ class Downloader:
         if download_to_tracks_and_create_m3u:
             m3u_output_dir = os.path.join(download_path)
         else:
-            m3u_output_dir = playlist_dir
+            m3u_output_dir = favorites_dir
 
         songutils.generate_playlist_m3u(
             playlist_dir=m3u_output_dir,
@@ -407,7 +413,10 @@ class Downloader:
 
         if album_infos:
             if "error" not in album_infos:
-                if album_infos["artist"]["name"] == "Various Artists" and "label" in album_infos:
+                if (
+                    album_infos["artist"]["name"] == "Various Artists"
+                    and "label" in album_infos
+                ):
                     album_artist = album_infos["label"]
                 else:
                     album_artist = album_infos["artist"]["name"]
@@ -415,11 +424,7 @@ class Downloader:
         album_artist = utils.sanitize_replace_slash(album_artist)
 
         song_album_dir = os.path.join(
-            download_path,
-            "Library",
-            "Artists",
-            album_artist,
-            album_title
+            download_path, "Library", "Artists", album_artist, album_title
         )
 
         # Create song album dir
@@ -452,9 +457,7 @@ class Downloader:
 
         song_file_path_in_tracks = result["output_file_full_path"]
         song_file_name = result["output_file_name"]
-        song_file_path_in_album = os.path.join(
-            song_album_dir, song_file_name
-        )
+        song_file_path_in_album = os.path.join(song_album_dir, song_file_name)
 
         # Create song link from 'Tracks' directory to its album folder
         duplicates_links_type = self.client.config.get_value(
@@ -492,7 +495,10 @@ class Downloader:
 
         if album_infos:
             if "error" not in album_infos:
-                if album_infos["artist"]["name"] == "Various Artists" and "label" in album_infos:
+                if (
+                    album_infos["artist"]["name"] == "Various Artists"
+                    and "label" in album_infos
+                ):
                     album_artist = album_infos["label"]
                 else:
                     album_artist = album_infos["artist"]["name"]
@@ -500,14 +506,6 @@ class Downloader:
         album_artist = utils.sanitize_replace_slash(album_artist)
 
         print(f"Downloading album: {album_artist} - {album_name}")
-
-        song_album_dir = os.path.join(
-            download_path,
-            "Library",
-            "Artists",
-            album_artist,
-            album_name
-        )
 
         # Number of songs
         song_count = album_data.get("total")
@@ -520,8 +518,6 @@ class Downloader:
         if not songs:
             print("Error: No songs found")
             return
-
-        is_single_track_album = len(songs) == 1
 
         album_dir = os.path.join(
             download_path, "Library", "Artists", album_artist, album_name
@@ -683,7 +679,10 @@ class Downloader:
 
             if album_infos:
                 if "error" not in album_infos:
-                    if album_infos["artist"]["name"] == "Various Artists" and "label" in album_infos:
+                    if (
+                        album_infos["artist"]["name"] == "Various Artists"
+                        and "label" in album_infos
+                    ):
                         album_artist = album_infos["label"]
                     else:
                         album_artist = album_infos["artist"]["name"]
@@ -691,11 +690,7 @@ class Downloader:
             album_artist = utils.sanitize_replace_slash(album_artist)
 
             song_album_dir = os.path.join(
-                download_path,
-                "Library",
-                "Artists",
-                album_artist,
-                song["ALB_TITLE"]
+                download_path, "Library", "Artists", album_artist, song["ALB_TITLE"]
             )
 
             # Create song album dir
@@ -732,7 +727,9 @@ class Downloader:
                         playlist_dir, song_file_name
                     )
 
-                    song_file_path_in_album = os.path.join(song_album_dir, song_file_name)
+                    song_file_path_in_album = os.path.join(
+                        song_album_dir, song_file_name
+                    )
 
                     # Create song link from 'Tracks' directory to its album folder
                     if not os.path.exists(song_file_path_in_album):
@@ -789,7 +786,9 @@ class Downloader:
                         link_type=duplicates_links_type,
                     )
 
-                relative_path_in_tracks = f"../Artists/{album_artist}/{song['ALB_TITLE']}/{song_file_name}"
+                relative_path_in_tracks = (
+                    f"../Artists/{album_artist}/{song['ALB_TITLE']}/{song_file_name}"
+                )
 
                 # Add song to M3U playlist
                 downloaded_songs.append(relative_path_in_tracks)

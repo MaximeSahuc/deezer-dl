@@ -106,7 +106,7 @@ class Api:
             return response.json()
 
         return None
-    
+
     def get_album_infos(self, playlist_id):
         url = f"https://api.deezer.com/album/{playlist_id}/"
 
