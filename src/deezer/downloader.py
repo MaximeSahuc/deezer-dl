@@ -531,6 +531,9 @@ class Downloader:
                 song["ALB_TITLE"]
             )
 
+            # Create song album dir
+            os.makedirs(song_album_dir, exist_ok=True)
+
             if not download_to_tracks_and_create_m3u:
                 # When using links for duplicates
                 if use_links_for_duplicates:
@@ -538,33 +541,33 @@ class Downloader:
                     result = self._download_song(
                         prefered_audio_quality=prefered_audio_quality,
                         song_data=song,
-                        output_path=song_album_dir,
+                        output_path=tracks_dir,
                     )
 
                     if result["error"]:
                         print(f"Error: {result['message']}. Skipping.")
                         continue
 
-                    song_file_path_in_album = result["output_file_full_path"]
+                    song_file_path_in_tracks = result["output_file_full_path"]
                     song_file_name = result["output_file_name"]
                     song_file_path_in_playlist = os.path.join(
                         playlist_dir, song_file_name
                     )
 
-                    song_file_path_in_tracks = os.path.join(download_path, "Tracks", song_file_name)
+                    song_file_path_in_album = os.path.join(song_album_dir, song_file_name)
 
-                    # Create song link from its album folder to the 'Tracks' directory
+                    # Create song link from 'Tracks' directory to its album folder
                     if not os.path.exists(song_file_path_in_album):
                         utils.create_link(
-                            src=song_file_path_in_album,
-                            dest=song_file_path_in_tracks,
+                            src=song_file_path_in_tracks,
+                            dest=song_file_path_in_album,
                             link_type=duplicates_links_type,
                         )
 
-                    # Create song link from its album folder to its playlist directory
+                    # Create song link from Tracks folder to its playlist directory
                     if not os.path.exists(song_file_path_in_playlist):
                         utils.create_link(
-                            src=song_file_path_in_album,
+                            src=song_file_path_in_tracks,
                             dest=song_file_path_in_playlist,
                             link_type=duplicates_links_type,
                         )
@@ -589,7 +592,7 @@ class Downloader:
                 result = self._download_song(
                     prefered_audio_quality=prefered_audio_quality,
                     song_data=song,
-                    output_path=song_album_dir,
+                    output_path=tracks_dir,
                 )
 
                 if result["error"]:
@@ -597,14 +600,14 @@ class Downloader:
                     continue
 
                 song_file_name = result["output_file_name"]
-                song_file_path_in_album = result["output_file_full_path"]
-                song_file_path_in_tracks = os.path.join(download_path, "Tracks", song_file_name)
+                song_file_path_in_tracks = result["output_file_full_path"]
+                song_file_path_in_album = os.path.join(song_album_dir, song_file_name)
 
                 # Create song link from its album folder to the 'Tracks' directory
                 if not os.path.exists(song_file_path_in_album):
                     utils.create_link(
-                        src=song_file_path_in_album,
-                        dest=song_file_path_in_tracks,
+                        src=song_file_path_in_tracks,
+                        dest=song_file_path_in_album,
                         link_type=duplicates_links_type,
                     )
 
