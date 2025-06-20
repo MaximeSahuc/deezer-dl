@@ -483,7 +483,13 @@ class Downloader:
                     print(f"Error: {result['message']}. Skipping.")
                     continue
 
-    def download_playlist(self, download_path, prefered_audio_quality, url):
+    def download_playlist(
+        self,
+        download_path,
+        prefered_audio_quality,
+        url,
+        download_to_tracks_and_create_m3u=True,
+    ):
         playlist_data = self.client.api.get_playlist_data(url)
 
         if len(playlist_data["DATA"]) == 0:
@@ -493,6 +499,9 @@ class Downloader:
         # Playlist infos
         playlist_name = playlist_data.get("DATA", {}).get("TITLE")
         playlist_id = playlist_data.get("DATA", {}).get("PLAYLIST_ID")
+        sanitized_playlist_name = utils.sanitize_folder_name(
+            name=playlist_name, item_id=playlist_id
+        )
         print(f"Downloading playlist: {playlist_name} - {playlist_id}")
 
         # Number of songs
@@ -508,16 +517,19 @@ class Downloader:
             return
 
         # Create playlist directory
-        sanitized_playlist_name = utils.sanitize_folder_name(
-            name=playlist_name, item_id=playlist_id
-        )
-        playlist_dir = os.path.join(download_path, "Playlists", sanitized_playlist_name)
-        os.makedirs(playlist_dir, exist_ok=True)
+        if download_to_tracks_and_create_m3u:
+            playlists_dir = os.path.join(download_path, "Playlists")
+            os.makedirs(playlists_dir, exist_ok=True)
+        else:
+            playlist_dir = os.path.join(
+                download_path, "Playlists", sanitized_playlist_name
+            )
+            os.makedirs(playlist_dir, exist_ok=True)
 
-        # Save API response
-        api_response_file = os.path.join(playlist_dir, "playlist_data.json")
-        with open(api_response_file, "w") as fo:
-            fo.write(json.dumps(playlist_data, indent=2))
+            # Save API response
+            api_response_file = os.path.join(playlist_dir, "playlist_data.json")
+            with open(api_response_file, "w") as fo:
+                fo.write(json.dumps(playlist_data, indent=2))
 
         # Create 'Tracks' folder to store all songs if we should use links for duplicates files
         use_links_for_duplicates = self.client.config.get_value(
@@ -547,9 +559,51 @@ class Downloader:
                 ""  # Full file name will be returned by the "_download_song" function
             )
 
-            # When using links for duplicates
-            if use_links_for_duplicates:
-                # Download song to 'Tracks' folder
+            if not download_to_tracks_and_create_m3u:
+                # When using links for duplicates
+                if use_links_for_duplicates:
+                    # Download song to 'Tracks' folder
+                    result = self._download_song(
+                        prefered_audio_quality=prefered_audio_quality,
+                        song_data=song,
+                        output_path=tracks_dir,
+                    )
+
+                    if result["error"]:
+                        print(f"Error: {result['message']}. Skipping.")
+                        continue
+
+                    song_file_path_in_tracks = result["output_file_full_path"]
+                    song_file_name = result["output_file_name"]
+                    song_file_path_in_playlist = os.path.join(
+                        playlist_dir, song_file_name
+                    )
+
+                    # Create song link from 'Tracks' folder to its playlist directory
+                    if not os.path.exists(song_file_path_in_playlist):
+                        utils.create_link(
+                            src=song_file_path_in_tracks,
+                            dest=song_file_path_in_playlist,
+                            link_type=duplicates_links_type,
+                        )
+
+                # When NOT using links for duplicates
+                else:
+                    # Download song to its playlist folder
+                    result = self._download_song(
+                        prefered_audio_quality=prefered_audio_quality,
+                        song_data=song,
+                        output_path=playlist_dir,
+                    )
+
+                    if result["error"]:
+                        print(f"Error: {result['message']}. Skipping.")
+                        continue
+
+                # Add song to M3U playlist
+                downloaded_songs.append(song_file_name)
+            else:
+                # Download track to 'Tracks' directory and use 'Tracks' directory in m3u playlist file
                 result = self._download_song(
                     prefered_audio_quality=prefered_audio_quality,
                     song_data=song,
@@ -560,37 +614,19 @@ class Downloader:
                     print(f"Error: {result['message']}. Skipping.")
                     continue
 
-                song_file_path_in_tracks = result["output_file_full_path"]
-                song_file_name = result["output_file_name"]
-                song_file_path_in_playlist = os.path.join(playlist_dir, song_file_name)
+                relative_path_in_tracks = f"../Tracks/{result['output_file_name']}"
 
-                # Create song link from 'Tracks' folder to its playlist directory
-                if not os.path.exists(song_file_path_in_playlist):
-                    utils.create_link(
-                        src=song_file_path_in_tracks,
-                        dest=song_file_path_in_playlist,
-                        link_type=duplicates_links_type,
-                    )
-
-            # When NOT using links for duplicates
-            else:
-                # Download song to its playlist folder
-                result = self._download_song(
-                    prefered_audio_quality=prefered_audio_quality,
-                    song_data=song,
-                    output_path=playlist_dir,
-                )
-
-                if result["error"]:
-                    print(f"Error: {result['message']}. Skipping.")
-                    continue
-
-            # Add song to M3U playlist
-            downloaded_songs.append(song_file_name)
+                # Add song to M3U playlist
+                downloaded_songs.append(relative_path_in_tracks)
 
         # Generate M3U playlist file
+        if download_to_tracks_and_create_m3u:
+            m3u_output_dir = os.path.join(download_path, "Playlists")
+        else:
+            m3u_output_dir = playlist_dir
+
         songutils.generate_playlist_m3u(
-            playlist_dir=playlist_dir,
+            playlist_dir=m3u_output_dir,
             playlist_name=sanitized_playlist_name,
             songs=downloaded_songs,
         )
@@ -703,7 +739,7 @@ class Downloader:
                     download_path,
                     prefered_audio_quality,
                     album["id"],
-                    allow_single_track_album=False,
+                    allow_single_track_album=True,
                     album_data=album_data,
                 )
 
