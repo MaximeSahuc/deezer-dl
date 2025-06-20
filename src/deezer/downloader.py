@@ -366,10 +366,8 @@ class Downloader:
         )
 
         album_dir = os.path.join(
-            download_path, "Artists", album_artist, sanitized_album_name
+            download_path, "Library", "Artists", album_artist, sanitized_album_name
         )
-
-        singles_dir = os.path.join(download_path, "Artists", album_artist, "Singles")
 
         # Create album directory
         os.makedirs(album_dir, exist_ok=True)
@@ -484,11 +482,11 @@ class Downloader:
 
         # Create playlist directory
         if download_to_tracks_and_create_m3u:
-            playlists_dir = os.path.join(download_path, "Playlists")
+            playlists_dir = os.path.join(download_path, "Library", "Playlists")
             os.makedirs(playlists_dir, exist_ok=True)
         else:
             playlist_dir = os.path.join(
-                download_path, "Playlists", sanitized_playlist_name
+                download_path, "Library", "Playlists", sanitized_playlist_name
             )
             os.makedirs(playlist_dir, exist_ok=True)
 
@@ -525,6 +523,14 @@ class Downloader:
                 ""  # Full file name will be returned by the "_download_song" function
             )
 
+            song_album_dir = os.path.join(
+                download_path,
+                "Library",
+                "Artists",
+                song["ART_NAME"],
+                song["ALB_TITLE"]
+            )
+
             if not download_to_tracks_and_create_m3u:
                 # When using links for duplicates
                 if use_links_for_duplicates:
@@ -532,23 +538,33 @@ class Downloader:
                     result = self._download_song(
                         prefered_audio_quality=prefered_audio_quality,
                         song_data=song,
-                        output_path=tracks_dir,
+                        output_path=song_album_dir,
                     )
 
                     if result["error"]:
                         print(f"Error: {result['message']}. Skipping.")
                         continue
 
-                    song_file_path_in_tracks = result["output_file_full_path"]
+                    song_file_path_in_album = result["output_file_full_path"]
                     song_file_name = result["output_file_name"]
                     song_file_path_in_playlist = os.path.join(
                         playlist_dir, song_file_name
                     )
 
-                    # Create song link from 'Tracks' folder to its playlist directory
+                    song_file_path_in_tracks = os.path.join(download_path, "Tracks", song_file_name)
+
+                    # Create song link from its album folder to the 'Tracks' directory
+                    if not os.path.exists(song_file_path_in_album):
+                        utils.create_link(
+                            src=song_file_path_in_album,
+                            dest=song_file_path_in_tracks,
+                            link_type=duplicates_links_type,
+                        )
+
+                    # Create song link from its album folder to its playlist directory
                     if not os.path.exists(song_file_path_in_playlist):
                         utils.create_link(
-                            src=song_file_path_in_tracks,
+                            src=song_file_path_in_album,
                             dest=song_file_path_in_playlist,
                             link_type=duplicates_links_type,
                         )
@@ -573,21 +589,33 @@ class Downloader:
                 result = self._download_song(
                     prefered_audio_quality=prefered_audio_quality,
                     song_data=song,
-                    output_path=tracks_dir,
+                    output_path=song_album_dir,
                 )
 
                 if result["error"]:
                     print(f"Error: {result['message']}. Skipping.")
                     continue
 
-                relative_path_in_tracks = f"../Tracks/{result['output_file_name']}"
+                song_file_name = result["output_file_name"]
+                song_file_path_in_album = result["output_file_full_path"]
+                song_file_path_in_tracks = os.path.join(download_path, "Tracks", song_file_name)
+
+                # Create song link from its album folder to the 'Tracks' directory
+                if not os.path.exists(song_file_path_in_album):
+                    utils.create_link(
+                        src=song_file_path_in_album,
+                        dest=song_file_path_in_tracks,
+                        link_type=duplicates_links_type,
+                    )
+
+                relative_path_in_tracks = f"../Artists/{song['ART_NAME']}/{song['ALB_TITLE']}/{song_file_name}"
 
                 # Add song to M3U playlist
                 downloaded_songs.append(relative_path_in_tracks)
 
         # Generate M3U playlist file
         if download_to_tracks_and_create_m3u:
-            m3u_output_dir = os.path.join(download_path, "Playlists")
+            m3u_output_dir = os.path.join(download_path, "Library", "Playlists")
         else:
             m3u_output_dir = playlist_dir
 
