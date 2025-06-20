@@ -15,6 +15,11 @@ class Api:
             response = self.client.session.get(next_url)
             json_data = response.json()
 
+            if "error" in json_data:
+                import json
+                print(json.dumps(json_data, indent=2))
+                return tracks_list
+
             tracks = json_data["data"]
 
             if not tracks:
