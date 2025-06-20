@@ -523,11 +523,20 @@ class Downloader:
                 ""  # Full file name will be returned by the "_download_song" function
             )
 
+            album_infos = self.client.api.get_album_infos(song["ALB_ID"])
+            song_album_artist = "Unknown"
+
+            if album_infos:
+                if album_infos["artist"]["name"] == "Various Artists" and "label" in album_infos:
+                    song_album_artist = album_infos["label"]
+                else:
+                    song_album_artist = album_infos["artist"]["name"]
+
             song_album_dir = os.path.join(
                 download_path,
                 "Library",
                 "Artists",
-                song["ART_NAME"],
+                song_album_artist,
                 song["ALB_TITLE"]
             )
 
