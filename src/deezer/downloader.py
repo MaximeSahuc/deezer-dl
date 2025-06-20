@@ -933,6 +933,6 @@ class Downloader:
             self.download_all_from_artist(artist["id"])
 
     def download_all(self):
-        self.download_favorites()
         self.download_all_albums()
+        self.download_favorites()
         self.download_all_playlists()
