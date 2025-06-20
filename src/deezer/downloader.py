@@ -386,10 +386,10 @@ class Downloader:
 
         # Download album cover
         album_cover_id = songs[0]["ALB_PICTURE"]
-        album_cover_url = songutils.get_picture_link(album_cover_id)
         album_cover_file = os.path.join(album_dir, "cover.jpg")
 
         if not os.path.exists(album_cover_file):
+            album_cover_url = songutils.get_picture_link(album_cover_id)
             utils.download_image(
                 self.client.session,
                 file_output=album_cover_file,
@@ -534,6 +534,18 @@ class Downloader:
             # Create song album dir
             os.makedirs(song_album_dir, exist_ok=True)
 
+            # Download album cover
+            album_cover_id = song["ALB_PICTURE"]
+            album_cover_file = os.path.join(song_album_dir, "cover.jpg")
+
+            if not os.path.exists(album_cover_file):
+                album_cover_url = songutils.get_picture_link(album_cover_id)
+                utils.download_image(
+                    self.client.session,
+                    file_output=album_cover_file,
+                    url=album_cover_url,
+                )
+
             if not download_to_tracks_and_create_m3u:
                 # When using links for duplicates
                 if use_links_for_duplicates:
@@ -588,7 +600,7 @@ class Downloader:
                 # Add song to M3U playlist
                 downloaded_songs.append(song_file_name)
             else:
-                # Download track to 'Tracks' directory and use 'Tracks' directory in m3u playlist file
+                # Download track to 'Tracks' directory
                 result = self._download_song(
                     prefered_audio_quality=prefered_audio_quality,
                     song_data=song,
