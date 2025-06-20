@@ -8,6 +8,11 @@ def get_song_filename(song_artist, song_title, file_extension=None):
     return filename.replace("/", "\u2215")
 
 
+def sanitize_replace_slash(input):
+    # Replace with DIVISION SLASH and not forward slash
+    return input.replace("/", "\u2215")
+
+
 def sanitize_folder_name(name, item_id):
     import re
     from unidecode import unidecode

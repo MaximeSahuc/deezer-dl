@@ -3,7 +3,6 @@ import json
 import deezer.utils as utils
 import deezer.songutils as songutils
 
-
 ERROR_LOG_FILE_PATH = os.path.join(os.path.expanduser("~"), ".deezer-dl", "errors.log")
 
 
@@ -354,6 +353,8 @@ class Downloader:
             else:
                 album_artist = album_infos["artist"]["name"]
 
+        album_artist = utils.sanitize_replace_slash(album_artist)
+
         print(f"Downloading album: {album_artist} - {album_name}")
 
         song_album_dir = os.path.join(
@@ -534,19 +535,21 @@ class Downloader:
             )
 
             album_infos = self.client.api.get_album_infos(song["ALB_ID"])
-            song_album_artist = "Unknown"
+            album_artist = "Unknown"
 
             if album_infos:
                 if album_infos["artist"]["name"] == "Various Artists" and "label" in album_infos:
-                    song_album_artist = album_infos["label"]
+                    album_artist = album_infos["label"]
                 else:
-                    song_album_artist = album_infos["artist"]["name"]
+                    album_artist = album_infos["artist"]["name"]
+
+            album_artist = utils.sanitize_replace_slash(album_artist)
 
             song_album_dir = os.path.join(
                 download_path,
                 "Library",
                 "Artists",
-                song_album_artist,
+                album_artist,
                 song["ALB_TITLE"]
             )
 
@@ -641,7 +644,7 @@ class Downloader:
                         link_type=duplicates_links_type,
                     )
 
-                relative_path_in_tracks = f"../Artists/{song_album_artist}/{song['ALB_TITLE']}/{song_file_name}"
+                relative_path_in_tracks = f"../Artists/{album_artist}/{song['ALB_TITLE']}/{song_file_name}"
 
                 # Add song to M3U playlist
                 downloaded_songs.append(relative_path_in_tracks)
