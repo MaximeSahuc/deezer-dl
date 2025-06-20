@@ -348,25 +348,6 @@ class Downloader:
         album_artist = album_data.get("data", [])[0].get("ART_NAME")
         print(f"Downloading album: {album_artist} - {album_name}")
 
-        # Get album release year
-        album_release_date = None
-        album_release_year = None
-        if "ORIGINAL_RELEASE_DATE" in album_data.get("data", [])[0]:
-            album_release_date = album_data.get("data", [])[0].get(
-                "ORIGINAL_RELEASE_DATE"
-            )
-        elif "PHYSICAL_RELEASE_DATE" in album_data.get("data", [])[0]:
-            album_release_date = album_data.get("data", [])[0].get(
-                "PHYSICAL_RELEASE_DATE"
-            )
-        elif "DIGITAL_RELEASE_DATE" in album_data.get("data", [])[0]:
-            album_release_date = album_data.get("data", [])[0].get(
-                "DIGITAL_RELEASE_DATE"
-            )
-
-        if album_release_date:
-            album_release_year = album_release_date.split("-")[0]
-
         # Number of songs
         song_count = album_data.get("total")
         if song_count is None:
@@ -384,9 +365,6 @@ class Downloader:
         sanitized_album_name = utils.sanitize_folder_name(
             name=album_name, item_id=album_id
         )
-
-        if album_release_year:
-            sanitized_album_name = f"[{album_release_year}] {sanitized_album_name}"
 
         album_dir = os.path.join(
             download_path, "Artists", album_artist, sanitized_album_name
