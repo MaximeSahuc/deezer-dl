@@ -344,8 +344,25 @@ class Downloader:
         # Album infos
         album_name = album_data.get("data", [])[0].get("ALB_TITLE")
         album_id = album_data.get("data", [])[0].get("ALB_ID")
-        album_artist = album_data.get("data", [])[0].get("ART_NAME")
+
+        album_infos = self.client.api.get_album_infos(album_id)
+        album_artist = "Unknown"
+
+        if album_infos:
+            if album_infos["artist"]["name"] == "Various Artists" and "label" in album_infos:
+                album_artist = album_infos["label"]
+            else:
+                album_artist = album_infos["artist"]["name"]
+
         print(f"Downloading album: {album_artist} - {album_name}")
+
+        song_album_dir = os.path.join(
+            download_path,
+            "Library",
+            "Artists",
+            album_artist,
+            album_name
+        )
 
         # Number of songs
         song_count = album_data.get("total")
@@ -361,12 +378,8 @@ class Downloader:
 
         is_single_track_album = len(songs) == 1
 
-        sanitized_album_name = utils.sanitize_folder_name(
-            name=album_name, item_id=album_id
-        )
-
         album_dir = os.path.join(
-            download_path, "Library", "Artists", album_artist, sanitized_album_name
+            download_path, "Library", "Artists", album_artist, album_name
         )
 
         # Create album directory
@@ -463,9 +476,6 @@ class Downloader:
         # Playlist infos
         playlist_name = playlist_data.get("DATA", {}).get("TITLE")
         playlist_id = playlist_data.get("DATA", {}).get("PLAYLIST_ID")
-        sanitized_playlist_name = utils.sanitize_folder_name(
-            name=playlist_name, item_id=playlist_id
-        )
         print(f"Downloading playlist: {playlist_name} - {playlist_id}")
 
         # Number of songs
@@ -486,7 +496,7 @@ class Downloader:
             os.makedirs(playlists_dir, exist_ok=True)
         else:
             playlist_dir = os.path.join(
-                download_path, "Library", "Playlists", sanitized_playlist_name
+                download_path, "Library", "Playlists", playlist_name
             )
             os.makedirs(playlist_dir, exist_ok=True)
 
@@ -546,7 +556,6 @@ class Downloader:
             # Download album cover
             album_cover_id = song["ALB_PICTURE"]
             album_cover_file = os.path.join(song_album_dir, "cover.jpg")
-
             if not os.path.exists(album_cover_file):
                 album_cover_url = songutils.get_picture_link(album_cover_id)
                 utils.download_image(
@@ -632,7 +641,7 @@ class Downloader:
                         link_type=duplicates_links_type,
                     )
 
-                relative_path_in_tracks = f"../Artists/{song['ART_NAME']}/{song['ALB_TITLE']}/{song_file_name}"
+                relative_path_in_tracks = f"../Artists/{song_album_artist}/{song['ALB_TITLE']}/{song_file_name}"
 
                 # Add song to M3U playlist
                 downloaded_songs.append(relative_path_in_tracks)
@@ -645,7 +654,7 @@ class Downloader:
 
         songutils.generate_playlist_m3u(
             playlist_dir=m3u_output_dir,
-            playlist_name=sanitized_playlist_name,
+            playlist_name=playlist_name,
             songs=downloaded_songs,
         )
 
