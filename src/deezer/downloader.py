@@ -331,7 +331,6 @@ class Downloader:
         prefered_audio_quality,
         url,
         album_data=None,
-        allow_single_track_album=True,
     ):
         print(f"Download album: {url} - {download_path}")
 
@@ -373,17 +372,7 @@ class Downloader:
         singles_dir = os.path.join(download_path, "Artists", album_artist, "Singles")
 
         # Create album directory
-        if allow_single_track_album or not is_single_track_album:
-            os.makedirs(album_dir, exist_ok=True)
-            # Save API response
-            api_response_file = os.path.join(album_dir, "album_data.json")
-            with open(api_response_file, "w") as fo:
-                fo.write(json.dumps(album_data, indent=2))
-
-        # Create directory for Singles
-        if not allow_single_track_album and is_single_track_album:
-            os.makedirs(singles_dir, exist_ok=True)
-            album_dir = singles_dir
+        os.makedirs(album_dir, exist_ok=True)
 
         # Create 'Tracks' folder to store all songs if we should use links for duplicates files
         use_links_for_duplicates = self.client.config.get_value(
@@ -398,17 +387,16 @@ class Downloader:
             os.makedirs(tracks_dir, exist_ok=True)
 
         # Download album cover
-        if not is_single_track_album and not allow_single_track_album:
-            album_cover_id = songs[0]["ALB_PICTURE"]
-            album_cover_url = songutils.get_picture_link(album_cover_id)
-            album_cover_file = os.path.join(album_dir, "cover.jpg")
+        album_cover_id = songs[0]["ALB_PICTURE"]
+        album_cover_url = songutils.get_picture_link(album_cover_id)
+        album_cover_file = os.path.join(album_dir, "cover.jpg")
 
-            if not os.path.exists(album_cover_file):
-                utils.download_image(
-                    self.client.session,
-                    file_output=album_cover_file,
-                    url=album_cover_url,
-                )
+        if not os.path.exists(album_cover_file):
+            utils.download_image(
+                self.client.session,
+                file_output=album_cover_file,
+                url=album_cover_url,
+            )
 
         # Download songs
         for song in songs:
@@ -717,7 +705,6 @@ class Downloader:
                     download_path,
                     prefered_audio_quality,
                     album["id"],
-                    allow_single_track_album=True,
                     album_data=album_data,
                 )
 
