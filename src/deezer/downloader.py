@@ -213,7 +213,7 @@ class Downloader:
             }
             exit(1)
 
-    def download_favorites(self):
+    def download_favorites(self, download_to_tracks_and_create_m3u=True,):
         user_id = self.client.user_data["userId"]
 
         # Settings
@@ -233,7 +233,8 @@ class Downloader:
 
         # Create favorites directory
         favorites_dir = os.path.join(download_path, "Favorites")
-        os.makedirs(favorites_dir, exist_ok=True)
+        if not download_to_tracks_and_create_m3u:
+            os.makedirs(favorites_dir, exist_ok=True)
 
         # Create 'Tracks' folder to store all songs if we should use links for duplicates files
         use_links_for_duplicates = self.client.config.get_value(
@@ -246,6 +247,9 @@ class Downloader:
 
         if use_links_for_duplicates:
             os.makedirs(tracks_dir, exist_ok=True)
+
+        # List of downloaded songs for M3U playlist file
+        downloaded_songs = []
 
         # Download songs
         for song in favorites_tracks:
@@ -260,9 +264,92 @@ class Downloader:
                 ""  # Full file name will be returned by the "_download_song" function
             )
 
-            # When using links for duplicates
-            if use_links_for_duplicates:
-                # Download song to 'Tracks' folder
+            album_infos = self.client.api.get_album_infos(song["ALB_ID"])
+            album_artist = "Unknown"
+
+            if album_infos:
+                if "error" not in album_infos:
+                    if album_infos["artist"]["name"] == "Various Artists" and "label" in album_infos:
+                        album_artist = album_infos["label"]
+                    else:
+                        album_artist = album_infos["artist"]["name"]
+
+            album_artist = utils.sanitize_replace_slash(album_artist)
+
+            song_album_dir = os.path.join(
+                download_path,
+                "Library",
+                "Artists",
+                album_artist,
+                song["ALB_TITLE"]
+            )
+
+            # Create song album dir
+            os.makedirs(song_album_dir, exist_ok=True)
+
+            # Download album cover
+            album_cover_id = song["ALB_PICTURE"]
+            album_cover_file = os.path.join(song_album_dir, "cover.jpg")
+            if not os.path.exists(album_cover_file):
+                album_cover_url = songutils.get_picture_link(album_cover_id)
+                utils.download_image(
+                    self.client.session,
+                    file_output=album_cover_file,
+                    url=album_cover_url,
+                )
+
+            if not download_to_tracks_and_create_m3u:
+                # When using links for duplicates
+                if use_links_for_duplicates:
+                    # Download song to 'Tracks' folder
+                    result = self._download_song(
+                        prefered_audio_quality=prefered_audio_quality,
+                        song_data=song,
+                        output_path=tracks_dir,
+                    )
+
+                    if result["error"]:
+                        print(f"Error: {result['message']}. Skipping.")
+                        continue
+
+                    song_file_path_in_tracks = result["output_file_full_path"]
+                    song_file_name = result["output_file_name"]
+                    song_file_path_in_favorites = os.path.join(
+                        favorites_dir, song_file_name
+                    )
+
+                    song_file_path_in_album = os.path.join(song_album_dir, song_file_name)
+
+                    # Create song link from 'Tracks' directory to its album folder
+                    if not os.path.exists(song_file_path_in_album):
+                        utils.create_link(
+                            src=song_file_path_in_tracks,
+                            dest=song_file_path_in_album,
+                            link_type=duplicates_links_type,
+                        )
+
+                    # Create song link from 'Tracks' folder to the 'Favorites' directory
+                    if not os.path.exists(song_file_path_in_favorites):
+                        utils.create_link(
+                            src=song_file_path_in_tracks,
+                            dest=song_file_path_in_favorites,
+                            link_type=duplicates_links_type,
+                        )
+
+                # When NOT using links for duplicates
+                else:
+                    # Download song to its 'Favorites' folder
+                    result = self._download_song(
+                        prefered_audio_quality=prefered_audio_quality,
+                        song_data=song,
+                        output_path=favorites_dir,
+                    )
+
+                    if result["error"]:
+                        print(f"Error: {result['message']}. Skipping.")
+                        continue
+            else:
+                # Download track to 'Tracks' directory
                 result = self._download_song(
                     prefered_audio_quality=prefered_audio_quality,
                     song_data=song,
@@ -273,32 +360,34 @@ class Downloader:
                     print(f"Error: {result['message']}. Skipping.")
                     continue
 
-                song_file_path_in_tracks = result["output_file_full_path"]
                 song_file_name = result["output_file_name"]
-                song_file_path_in_favorites = os.path.join(
-                    favorites_dir, song_file_name
-                )
+                song_file_path_in_tracks = result["output_file_full_path"]
+                song_file_path_in_album = os.path.join(song_album_dir, song_file_name)
 
-                # Create song link from 'Tracks' folder to the 'Favorites' directory
-                if not os.path.exists(song_file_path_in_favorites):
+                # Create song link from its album folder to the 'Tracks' directory
+                if not os.path.exists(song_file_path_in_album):
                     utils.create_link(
                         src=song_file_path_in_tracks,
-                        dest=song_file_path_in_favorites,
+                        dest=song_file_path_in_album,
                         link_type=duplicates_links_type,
                     )
 
-            # When NOT using links for duplicates
-            else:
-                # Download song to its 'Favorites' folder
-                result = self._download_song(
-                    prefered_audio_quality=prefered_audio_quality,
-                    song_data=song,
-                    output_path=favorites_dir,
-                )
+                relative_path_in_tracks = f"Artists/{album_artist}/{song['ALB_TITLE']}/{song_file_name}"
 
-                if result["error"]:
-                    print(f"Error: {result['message']}. Skipping.")
-                    continue
+                # Add song to M3U playlist
+                downloaded_songs.append(relative_path_in_tracks)
+
+        # Generate M3U playlist file
+        if download_to_tracks_and_create_m3u:
+            m3u_output_dir = os.path.join(download_path)
+        else:
+            m3u_output_dir = playlist_dir
+
+        songutils.generate_playlist_m3u(
+            playlist_dir=m3u_output_dir,
+            playlist_name="Favorites",
+            songs=downloaded_songs,
+        )
 
     def download_track(self, download_path, prefered_audio_quality, url):
         print(f"Download track: {url} - {download_path}")
@@ -317,10 +406,11 @@ class Downloader:
         album_artist = "Unknown"
 
         if album_infos:
-            if album_infos["artist"]["name"] == "Various Artists" and "label" in album_infos:
-                album_artist = album_infos["label"]
-            else:
-                album_artist = album_infos["artist"]["name"]
+            if "error" not in album_infos:
+                if album_infos["artist"]["name"] == "Various Artists" and "label" in album_infos:
+                    album_artist = album_infos["label"]
+                else:
+                    album_artist = album_infos["artist"]["name"]
 
         album_artist = utils.sanitize_replace_slash(album_artist)
 
@@ -401,10 +491,11 @@ class Downloader:
         album_artist = "Unknown"
 
         if album_infos:
-            if album_infos["artist"]["name"] == "Various Artists" and "label" in album_infos:
-                album_artist = album_infos["label"]
-            else:
-                album_artist = album_infos["artist"]["name"]
+            if "error" not in album_infos:
+                if album_infos["artist"]["name"] == "Various Artists" and "label" in album_infos:
+                    album_artist = album_infos["label"]
+                else:
+                    album_artist = album_infos["artist"]["name"]
 
         album_artist = utils.sanitize_replace_slash(album_artist)
 
@@ -591,10 +682,11 @@ class Downloader:
             album_artist = "Unknown"
 
             if album_infos:
-                if album_infos["artist"]["name"] == "Various Artists" and "label" in album_infos:
-                    album_artist = album_infos["label"]
-                else:
-                    album_artist = album_infos["artist"]["name"]
+                if "error" not in album_infos:
+                    if album_infos["artist"]["name"] == "Various Artists" and "label" in album_infos:
+                        album_artist = album_infos["label"]
+                    else:
+                        album_artist = album_infos["artist"]["name"]
 
             album_artist = utils.sanitize_replace_slash(album_artist)
 
