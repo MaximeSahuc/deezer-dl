@@ -631,6 +631,8 @@ class Downloader:
             print("Error: No songs found")
             return
 
+        playlist_name = utils.sanitize_folder_name(playlist_name)
+
         # Create playlist directory
         if download_to_tracks_and_create_m3u:
             playlists_dir = os.path.join(download_path, "Library", "Playlists")
