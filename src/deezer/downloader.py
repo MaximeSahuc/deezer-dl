@@ -86,7 +86,7 @@ class Downloader:
             os.remove(ERROR_LOG_FILE_PATH)
 
         # Create directory
-        os.makedirs(os.path.basename(ERROR_LOG_FILE_PATH), exist_ok=True)
+        os.makedirs(os.path.dirname(ERROR_LOG_FILE_PATH), exist_ok=True)
 
         # Create log file
         open(ERROR_LOG_FILE_PATH, "x")
