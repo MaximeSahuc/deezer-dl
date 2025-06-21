@@ -385,7 +385,7 @@ class Downloader:
 
         # Generate M3U playlist file
         if download_to_tracks_and_create_m3u:
-            m3u_output_dir = os.path.join(download_path)
+            m3u_output_dir = os.path.join(download_path, "Library")
         else:
             m3u_output_dir = favorites_dir
 
