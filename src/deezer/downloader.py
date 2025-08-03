@@ -825,7 +825,13 @@ class Downloader:
             "songs_absolute_paths": downloaded_songs_absolute_paths,
         }
 
-    def download_from_url(self, url, prefered_audio_quality=None, download_path=None):
+    def download_from_url(
+        self,
+        url,
+        prefered_audio_quality=None,
+        download_path=None,
+        playlists_create_m3u=True,
+    ):
         if not download_path:
             download_path = self.client.config.get_value(
                 "downloads", "music_download_path"
@@ -848,7 +854,10 @@ class Downloader:
         elif "playlist" in url:
             download_type = "playlist"
             download_result = self.download_playlist(
-                download_path, prefered_audio_quality, url
+                download_path,
+                prefered_audio_quality,
+                url,
+                create_m3u=playlists_create_m3u,
             )
 
         elif "album" in url:
@@ -859,10 +868,12 @@ class Downloader:
 
         else:
             print("Error: Cannot detect link type")
-            return {"error": True, "message": f"Cannot detect link type: {url}"}
+            return {
+                "error": {"message": f"Cannot detect link type: {url}"},
+                "result": {},
+            }
 
         return {
-            "error": False,
             "result": {
                 "download_type": download_type,
                 "download_result": download_result,
