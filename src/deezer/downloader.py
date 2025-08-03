@@ -470,6 +470,10 @@ class Downloader:
                 link_type=duplicates_links_type,
             )
 
+        return {
+            "songs_absolute_paths": [song_file_path_in_album],
+        }
+
     def download_album(
         self,
         download_path,
@@ -551,6 +555,7 @@ class Downloader:
             )
 
         # Download songs
+        song_file_path_in_album = None
         for song in songs:
             song_title = song["SNG_TITLE"]
             artist_name = song["ART_NAME"]
@@ -601,12 +606,17 @@ class Downloader:
                     print(f"Error: {result['message']}. Skipping.")
                     continue
 
+        return {
+            "songs_absolute_paths": [song_file_path_in_album],
+        }
+
     def download_playlist(
         self,
         download_path,
         prefered_audio_quality,
         url,
-        download_to_tracks_and_create_m3u=True,
+        download_to_tracks=True,
+        create_m3u=True,
     ):
         playlist_data = self.client.api.get_playlist_data(url)
 
@@ -634,7 +644,7 @@ class Downloader:
         playlist_name = utils.sanitize_replace_slash(playlist_name)
 
         # Create playlist directory
-        if download_to_tracks_and_create_m3u:
+        if download_to_tracks and create_m3u:
             playlists_dir = os.path.join(download_path, "Library", "Playlists")
             os.makedirs(playlists_dir, exist_ok=True)
         else:
@@ -661,7 +671,8 @@ class Downloader:
             os.makedirs(tracks_dir, exist_ok=True)
 
         # List of downloaded songs for M3U playlist file
-        downloaded_songs = []
+        downloaded_songs_relative_paths = []
+        downloaded_songs_absolute_paths = []
 
         # Download songs
         for song in songs:
@@ -709,7 +720,7 @@ class Downloader:
                     url=album_cover_url,
                 )
 
-            if not download_to_tracks_and_create_m3u:
+            if not download_to_tracks:
                 # When using links for duplicates
                 if use_links_for_duplicates:
                     # Download song to 'Tracks' folder
@@ -763,7 +774,8 @@ class Downloader:
                         continue
 
                 # Add song to M3U playlist
-                downloaded_songs.append(song_file_name)
+                downloaded_songs_relative_paths.append(song_file_name)
+                downloaded_songs_absolute_paths.append(song_file_name)
             else:
                 # Download track to 'Tracks' directory
                 result = self._download_song(
@@ -793,19 +805,25 @@ class Downloader:
                 )
 
                 # Add song to M3U playlist
-                downloaded_songs.append(relative_path_in_tracks)
+                downloaded_songs_relative_paths.append(relative_path_in_tracks)
+                downloaded_songs_absolute_paths.append(song_file_path_in_album)
 
         # Generate M3U playlist file
-        if download_to_tracks_and_create_m3u:
-            m3u_output_dir = os.path.join(download_path, "Library", "Playlists")
-        else:
-            m3u_output_dir = playlist_dir
+        if create_m3u:
+            if download_to_tracks:
+                m3u_output_dir = os.path.join(download_path, "Library", "Playlists")
+            else:
+                m3u_output_dir = playlist_dir
 
-        songutils.generate_playlist_m3u(
-            playlist_dir=m3u_output_dir,
-            playlist_name=playlist_name,
-            songs=downloaded_songs,
-        )
+            songutils.generate_playlist_m3u(
+                playlist_dir=m3u_output_dir,
+                playlist_name=playlist_name,
+                songs=downloaded_songs_relative_paths,
+            )
+
+        return {
+            "songs_absolute_paths": downloaded_songs_absolute_paths,
+        }
 
     def download_from_url(self, url, prefered_audio_quality=None, download_path=None):
         if not download_path:
@@ -818,17 +836,38 @@ class Downloader:
                 "deezer", "prefered_audio_quality"
             )
 
+        download_type = ""
+        download_result = {}
+
         if "track" in url:
-            self.download_track(download_path, prefered_audio_quality, url)
+            download_type = "track"
+            download_result = self.download_track(
+                download_path, prefered_audio_quality, url
+            )
 
         elif "playlist" in url:
-            self.download_playlist(download_path, prefered_audio_quality, url)
+            download_type = "playlist"
+            download_result = self.download_playlist(
+                download_path, prefered_audio_quality, url
+            )
 
         elif "album" in url:
-            self.download_album(download_path, prefered_audio_quality, url)
+            download_type = "album"
+            download_result = self.download_album(
+                download_path, prefered_audio_quality, url
+            )
 
         else:
             print("Error: Cannot detect link type")
+            return {"error": True, "message": f"Cannot detect link type: {url}"}
+
+        return {
+            "error": False,
+            "result": {
+                "download_type": download_type,
+                "download_result": download_result,
+            },
+        }
 
     def download_all_playlists(self, prefered_audio_quality=None, download_path=None):
         if not download_path:

@@ -17,6 +17,7 @@ class Api:
 
             if "error" in json_data:
                 import json
+
                 print(json.dumps(json_data, indent=2))
                 return tracks_list
 
