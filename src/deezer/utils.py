@@ -70,7 +70,7 @@ def extract_id_from_url(url):
 
 
 def download_image(session, file_output, pic_type, pic_id):
-    from songutils import download_picture_bytes
+    from deezer.songutils import download_picture_bytes
 
     with open(file_output, "wb") as of:
         of.write(
