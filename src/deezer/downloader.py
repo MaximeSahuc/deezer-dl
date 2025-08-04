@@ -472,6 +472,7 @@ class Downloader:
 
         return {
             "download_name": song_title,
+            "cover_path": album_cover_file,
             "songs_absolute_paths": [song_file_path_in_album],
         }
 
@@ -609,6 +610,7 @@ class Downloader:
 
         return {
             "download_name": album_name,
+            "cover_path": album_cover_file,
             "songs_absolute_paths": [song_file_path_in_album],
         }
 
@@ -646,30 +648,32 @@ class Downloader:
         playlist_name = utils.sanitize_replace_slash(playlist_name)
 
         # Create playlist directory
+        playlist_picture_of = None
         if download_to_tracks and create_m3u:
             playlists_dir = os.path.join(download_path, "Library", "Playlists")
             os.makedirs(playlists_dir, exist_ok=True)
+            playlist_picture_of = os.path.join(playlists_dir, f"{playlist_name}.jpg")
         else:
             playlist_dir = os.path.join(
                 download_path, "Library", "Playlists", playlist_name
             )
             os.makedirs(playlist_dir, exist_ok=True)
+            playlist_picture_of = os.path.join(playlist_dir, "cover.jpg")
 
             # Save API response
             api_response_file = os.path.join(playlist_dir, "playlist_data.json")
             with open(api_response_file, "w") as fo:
                 fo.write(json.dumps(playlist_data, indent=2))
 
-            # Save Playlist picture
-            playlist_picture_of = os.path.join(playlist_dir, "cover.jpg")
-            playlist_picture_type = playlist_data.get("DATA", {})["PICTURE_TYPE"]
-            playlist_picture_id = playlist_data.get("DATA", {})["PLAYLIST_PICTURE"]
-            utils.download_image(
-                self.client.session,
-                file_output=playlist_picture_of,
-                pic_type=playlist_picture_type,
-                pic_id=playlist_picture_id,
-            )
+        # Save Playlist picture
+        playlist_picture_type = playlist_data.get("DATA", {})["PICTURE_TYPE"]
+        playlist_picture_id = playlist_data.get("DATA", {})["PLAYLIST_PICTURE"]
+        utils.download_image(
+            self.client.session,
+            file_output=playlist_picture_of,
+            pic_type=playlist_picture_type,
+            pic_id=playlist_picture_id,
+        )
 
         # Create 'Tracks' folder to store all songs if we should use links for duplicates files
         use_links_for_duplicates = self.client.config.get_value(
@@ -836,6 +840,7 @@ class Downloader:
 
         return {
             "download_name": playlist_name,
+            "cover_path": playlist_picture_of,
             "songs_absolute_paths": downloaded_songs_absolute_paths,
         }
 
