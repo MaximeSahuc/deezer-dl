@@ -293,11 +293,11 @@ class Downloader:
             album_cover_id = song["ALB_PICTURE"]
             album_cover_file = os.path.join(song_album_dir, "cover.jpg")
             if not os.path.exists(album_cover_file):
-                album_cover_url = songutils.get_picture_link(album_cover_id)
                 utils.download_image(
                     self.client.session,
                     file_output=album_cover_file,
-                    url=album_cover_url,
+                    pic_type="cover",
+                    pic_id=album_cover_id,
                 )
 
             if not download_to_tracks_and_create_m3u:
@@ -448,11 +448,11 @@ class Downloader:
         album_cover_id = track_data["ALB_PICTURE"]
         album_cover_file = os.path.join(song_album_dir, "cover.jpg")
         if not os.path.exists(album_cover_file):
-            album_cover_url = songutils.get_picture_link(album_cover_id)
             utils.download_image(
                 self.client.session,
                 file_output=album_cover_file,
-                url=album_cover_url,
+                pic_type="cover",
+                pic_id=album_cover_id,
             )
 
         song_file_path_in_tracks = result["output_file_full_path"]
@@ -548,11 +548,11 @@ class Downloader:
         album_cover_file = os.path.join(album_dir, "cover.jpg")
 
         if not os.path.exists(album_cover_file):
-            album_cover_url = songutils.get_picture_link(album_cover_id)
             utils.download_image(
                 self.client.session,
                 file_output=album_cover_file,
-                url=album_cover_url,
+                pic_type="cover",
+                pic_id=album_cover_id,
             )
 
         # Download songs
@@ -660,6 +660,17 @@ class Downloader:
             with open(api_response_file, "w") as fo:
                 fo.write(json.dumps(playlist_data, indent=2))
 
+            # Save Playlist picture
+            playlist_picture_of = os.path.join(playlist_dir, "cover.jpg")
+            playlist_picture_type = playlist_data.get("DATA", {})["PICTURE_TYPE"]
+            playlist_picture_id = playlist_data.get("DATA", {})["PLAYLIST_PICTURE"]
+            utils.download_image(
+                self.client.session,
+                file_output=playlist_picture_of,
+                pic_type=playlist_picture_type,
+                pic_id=playlist_picture_id,
+            )
+
         # Create 'Tracks' folder to store all songs if we should use links for duplicates files
         use_links_for_duplicates = self.client.config.get_value(
             "downloads", "use_links_for_duplicates"
@@ -715,11 +726,11 @@ class Downloader:
             album_cover_id = song["ALB_PICTURE"]
             album_cover_file = os.path.join(song_album_dir, "cover.jpg")
             if not os.path.exists(album_cover_file):
-                album_cover_url = songutils.get_picture_link(album_cover_id)
                 utils.download_image(
                     self.client.session,
                     file_output=album_cover_file,
-                    url=album_cover_url,
+                    pic_type="cover",
+                    pic_id=album_cover_id,
                 )
 
             if not download_to_tracks:

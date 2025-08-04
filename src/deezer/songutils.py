@@ -56,7 +56,7 @@ def writeid3v1_1(fo, song):
 downloaded_pictures_cache = {}
 
 
-def download_picture(session, pic_idid):
+def download_picture_bytes(session, pic_type, pic_id):
     global downloaded_pictures_cache
 
     # Clear cache
@@ -64,18 +64,17 @@ def download_picture(session, pic_idid):
         downloaded_pictures_cache = {}
 
     # Cache album pictures
-    if pic_idid not in downloaded_pictures_cache:
-        res = session.get(get_picture_link(pic_idid))
+    if pic_id not in downloaded_pictures_cache:
+        res = session.get(get_picture_link(pic_type, pic_id))
         picture_bytes = res.content
-        downloaded_pictures_cache.update({pic_idid: picture_bytes})
+        downloaded_pictures_cache.update({pic_id: picture_bytes})
 
-    return downloaded_pictures_cache[pic_idid]
+    return downloaded_pictures_cache[pic_id]
 
 
-def get_picture_link(pic_idid):
+def get_picture_link(pic_type, pic_id):
     setting_domain_img = "https://cdn-images.dzcdn.net/images"
-    url = setting_domain_img + "/cover/" + pic_idid + "/1200x1200.jpg"
-    return url
+    return f"{setting_domain_img}/{pic_type}/{pic_id}/1200x1200.jpg"
 
 
 def writeid3v2(session, fo, song):
@@ -232,7 +231,14 @@ def writeid3v2(session, fo, song):
 
     try:
         id3.append(
-            maketag("APIC", makepic(download_picture(session, song["ALB_PICTURE"])))
+            maketag(
+                "APIC",
+                makepic(
+                    download_picture_bytes(
+                        session, pic_type="cover", pic_id=song["ALB_PICTURE"]
+                    )
+                ),
+            )
         )
     except Exception as e:
         print("ERROR: no album cover?", e)
