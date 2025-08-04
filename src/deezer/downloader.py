@@ -471,6 +471,7 @@ class Downloader:
             )
 
         return {
+            "download_name": song_title,
             "songs_absolute_paths": [song_file_path_in_album],
         }
 
@@ -607,6 +608,7 @@ class Downloader:
                     continue
 
         return {
+            "download_name": album_name,
             "songs_absolute_paths": [song_file_path_in_album],
         }
 
@@ -822,6 +824,7 @@ class Downloader:
             )
 
         return {
+            "download_name": playlist_name,
             "songs_absolute_paths": downloaded_songs_absolute_paths,
         }
 
